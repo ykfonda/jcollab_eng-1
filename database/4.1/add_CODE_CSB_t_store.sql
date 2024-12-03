@@ -1,0 +1,1 @@
+ALTER TABLE `stores` ADD `code_csb` VARCHAR(11) NOT NULL AFTER `code_journal`;

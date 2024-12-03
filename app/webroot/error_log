@@ -1,0 +1,12 @@
+[04-Aug-2020 11:47:56 UTC] PHP Fatal error:  Allowed memory size of 134217728 bytes exhausted (tried to allocate 72 bytes) in /home2/interna1/public_html/projects/karppes/app/Controller/ProduitsController.php on line 246
+[04-Aug-2020 11:49:25 UTC] PHP Fatal error:  Allowed memory size of 134217728 bytes exhausted (tried to allocate 72 bytes) in /home2/interna1/public_html/projects/karppes/app/Controller/ProduitsController.php on line 246
+[10-Mar-2023 19:42:58 Africa/Casablanca] PHP Fatal error:  Uncaught exception 'FatalErrorException' with message '[MissingConnectionException] Database connection "Mysql" is missing, or could not be created.
+#0 /home/iafsy7j9/public_html/jcollab/lib/Cake/Model/Datasource/DboSource.php(260): Mysql->connect()
+#1 /home/iafsy7j9/public_html/jcollab/lib/Cake/Model/ConnectionManager.php(105): DboSource->__construct(Array)
+#2 /home/iafsy7j9/public_html/jcollab/lib/Cake/Model/Model.php(3647): ConnectionManager::getDataSource('default')
+#3 /home/iafsy7j9/public_html/jcollab/lib/Cake/Model/Model.php(3022): Model->getDataSource()
+#4 /home/iafsy7j9/public_html/jcollab/lib/Cake/Model/Model.php(2994): Model->_readDataSource('list', Array)
+#5 /home/iafsy7j9/public_html/jcollab/app/Controller/ModulesController.php(17): Model->find('list', Array)
+#6 [internal function]: ModulesController->getSidebarMenu()
+#7 /home/iafsy7j9/public_html/jcollab/lib/Cake/Controller/Controller.php(490): ReflectionMethod->invokeArgs(Object(ModulesController), Array)
+#8 /home/iafsy7j9/public_html/jcollab/l in /home/iafsy7j9/public_html/jcollab/lib/Cake/Error/ErrorHandler.php on line 138

@@ -1,0 +1,5 @@
+le fichier 
+curl-ca-bundle.crt
+à mettre dans le dossier d'installation XAMP : 
+
+C:\xampp\apache\bin

@@ -1,0 +1,1 @@
+ALTER TABLE `entrees` ADD `sync` INT NOT NULL DEFAULT '0' COMMENT 'Etat de synchronisation' AFTER `type`;
