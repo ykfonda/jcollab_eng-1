@@ -55,7 +55,11 @@
 	            <?php echo $this->Form->input('tva_vente', ['class' => 'form-control', 'label' => false, 'empty' => '--TVA vente', 'options' => $tvas, 'required' => true]); ?>
 	          </div>
 	        </div>
+
+
 			<div class="form-group row">
+
+
 				<label class="control-label col-md-2">Pourcentage du perte</label>
 				<div class="col-md-3">
 					<?php echo $this->Form->input('pourcentage_perte', ['class' => 'form-control', 'label' => false, 'default' => 0, 'min' => 0, 'max' => 100]); ?>
@@ -64,7 +68,11 @@
 				<div class="col-md-3">
 					<?php echo $this->Form->input('active', ['class' => 'form-control', 'label' => false, 'required' => true, 'options' => $this->App->OuiNon()]); ?>
 				</div>
+
+
 			</div>
+
+
 			<div class="form-group row">
 				<label class="control-label col-md-2">Image</label>
 				<div class="col-md-8">
@@ -148,11 +156,21 @@
 					<?php echo $this->Form->input('volume', ['class' => 'form-control', 'label' => false, 'required' => false]); ?>
 				</div>
 				</div>
+
+
 				<div class="form-group row">
 				<label class="control-label col-md-2">Cdt en US</label>
 				<div class="col-md-3">
 					<?php echo $this->Form->input('conditionnement', ['class' => 'form-control', 'label' => false, 'required' => false]); ?>
-				</div></div>
+				</div>
+			
+				<label class="control-label col-md-2">Quantité économique</label>
+				<div class="col-md-3">
+					<?php echo $this->Form->input('qteofeco', ['class' => 'form-control', 'label' => false, 'default' => 0, 'min' => 0]); ?>
+				</div>
+
+				</div>
+
 				<div class="form-group row">
 				<label class="control-label col-md-2">DLC Jours</label>
 				<div class="col-md-3">

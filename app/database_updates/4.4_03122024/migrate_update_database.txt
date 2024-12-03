@@ -1,0 +1,3 @@
+ALTER TABLE `produits` ADD `qteofeco` DECIMAL(11,3) NOT NULL DEFAULT '0' COMMENT 'Quantité economique' AFTER `ecom`;
+
+
