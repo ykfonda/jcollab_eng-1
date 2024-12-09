@@ -892,24 +892,32 @@ class IngredientsController extends AppController
 
         	// API TEMP
             // Pour l'équipe de NEXA
-	public function apiGetEngProducts($store_id = null, $caisse_id = null, $salepoint_id = null)
-	{
-		// Définir le type de réponse
-		$this->response->type('json');
-
-        // Récupérer les données de la table "Salepoint"
-        $produits = $this->Produit->find('all',[
-            'conditions' => [
-                'Produit.deleted' => 0,
-            ]
-        ]);
-
-		// Afficher les données en format JSON
-		echo json_encode($produits);
-        
-		// Arrêter le rendu de la vue
-		return $this->response;
-	}
+            public function apiGetEngProducts($store_id = null, $caisse_id = null, $salepoint_id = null)
+            {
+                // Définir le type de réponse
+                $this->response->type('json');
+            
+                // Récupérer les données de la table "Produit"
+                $produits = $this->Produit->find('all', [
+                    'conditions' => [
+                        'Produit.deleted' => 0,
+                    ]
+                ]);
+            
+                // Ajouter le préfixe "2008" au champ "code_barre" pour chaque produit
+                foreach ($produits as &$produit) {
+                    if (isset($produit['Produit']['code_barre'])) {
+                        $produit['Produit']['code_barre'] = '2008' . $produit['Produit']['code_barre'];
+                    }
+                }
+            
+                // Afficher les données en format JSON
+                echo json_encode($produits);
+            
+                // Arrêter le rendu de la vue
+                return $this->response;
+            }
+            
     
     
         // Inérer les données récupérées des produits à la caisse demanderesse
