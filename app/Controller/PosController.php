@@ -2501,12 +2501,20 @@ class PosController extends AppController
 
     public function scan($code_barre = null, $salepoint_id = null)
     {
+
+
+
         $response['error'] = true;
         $response['message'] = '';
         $longeur = strlen($code_barre);
+
+ 
+
         if ($longeur != 13) {
             $response['message'] = 'Code a barre est incorrect , produit introuvable !';
         } else {
+
+
             $params = $this->Parametreste->findList();
             $cb_identifiant = (isset($params['cb_identifiant']) and !empty($params['cb_identifiant'])) ? $params['cb_identifiant'] : '2900';
             $cb_produit_depart = (isset($params['cb_produit_depart']) and !empty($params['cb_produit_depart'])) ? $params['cb_produit_depart'] : 4;
@@ -2516,14 +2524,40 @@ class PosController extends AppController
             $cb_div_kg = (isset($params['cb_div_kg']) and !empty($params['cb_div_kg']) and $params['cb_div_kg'] > 0) ? (int) $params['cb_div_kg'] : 1000;
 
             $identifiant = substr(trim($code_barre), 0, 4);
-            if ($cb_identifiant != $identifiant) {
-                $response['message'] = "Identifiant du code à barre est incorrect , veuillez vérifier votre paramétrage d'application !";
-            } else {
-                $code_article = substr(trim($code_barre), $cb_produit_depart, $cb_produit_longeur);
-                $quantite = substr(trim($code_barre), $cb_quantite_depart, $cb_quantite_longeur);
+
+            // if ($cb_identifiant != $identifiant) {
+                //$response['message'] = "Identifiant du code à barre est incorrect , veuillez vérifier votre paramétrage d'application !";
+               
+               
+                if ($identifiant != 2900) {
+                    $produit = $this->Produit->find('first', ['fields' => ['id','code_barre'], 'conditions' => ['Produit.type' => 2, 'Produit.ean13' => $code_barre]]);
+                    $code_article = $produit['Produit']['code_barre'];
+                $quantite = 1;
+                }
+                
+
+               
+
+              
+
+            //} 
+            
+            // else {
+
+ 
+                if (!isset($code_article) && (empty($code_article))) {
+                    $code_article = substr(trim($code_barre), $cb_produit_depart, $cb_produit_longeur);
+                    $quantite = substr(trim($code_barre), $cb_quantite_depart, $cb_quantite_longeur);
+                }
+
+
+
 
                 if (!empty($code_article)) {
+
+                   
                     $produit = $this->Produit->find('first', ['fields' => ['id', 'pese', 'prix_vente', 'unite_id', 'tva_vente'], 'conditions' => ['Produit.type' => 2, 'Produit.code_barre' => $code_article]]);
+
 
                     if (isset($produit['Produit']['id']) and !empty($produit['Produit']['id'])) {
                         if (isset($produit['Produit']['pese']) and $produit['Produit']['pese'] == '1') {
@@ -2613,7 +2647,7 @@ class PosController extends AppController
                 } else {
                     $response['message'] = 'Code a barre incorrect ou vide !';
                 }
-            }
+            //}
         }
 
         header('Content-Type: application/json; charset=UTF-8');
