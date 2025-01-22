@@ -8,9 +8,9 @@
 <div class="modal-header">
 	<h4 class="modal-title">
 		<?php if (isset($this->data['Produit']['id'])): ?>
-			Modifier un produit
+			Modifier une recette
 		<?php else: ?>
-			Nouveau produit
+			Nouvelle recette 
 		<?php endif; ?>
 	</h4>
 </div>
