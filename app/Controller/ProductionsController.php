@@ -72,6 +72,9 @@ class ProductionsController extends AppController {
 	}
 
 	public function editall() {
+
+		
+
 		$store_type = $this->Session->read('Auth.User.StoreSession.type');
 		$role_id = $this->Session->read('Auth.User.role_id');
 		$user_id = $this->Session->read('Auth.User.id');
@@ -137,6 +140,9 @@ class ProductionsController extends AppController {
 		$this->layout = false;
 	}
 	public function updateProduction() {
+
+		
+
 		$quantite_prod = $this->request->data['Production']['quantite_prod'];
 		$this->Production->id = $this->request->data['Production']['id'];
 		$this->Production->saveField("quantite_prod",$quantite_prod);
@@ -146,21 +152,20 @@ class ProductionsController extends AppController {
 			'contain'=>['Produit' => ['Unite'] ,'Production'],
 		]);
 
-		
-
 		$total_prod = 0;	
 		foreach ($details as $v) {
 			$ingredients = $this->Production->Productiondetail->Produit->Produitingredient->find('first',[
 				'conditions' => [ 'produit_id' => $v['Production']['produit_id'],'ingredient_id' => $v['Productiondetail']['produit_id'] ],
 				'contain' => ["Produit"],	
 			]);
-				$quantite_reel =  $this->request->data['Production']['quantite_prod'] * $ingredients['Produitingredient']['quantite'];
+				//$quantite_reel =  $this->request->data['Production']['quantite_prod'] * $ingredients['Produitingredient']['quantite'];
 				$this->Production->Productiondetail->id = $v['Productiondetail']['id'];
-				$this->Production->Productiondetail->saveField("quantite_reel",$quantite_reel);
-				$total_prod += ($this->request->data['Production']['quantite_prod'] * $ingredients['Produitingredient']['quantite'] * $v['Produit']['prixachat']);
-				
+				// $this->Production->Productiondetail->saveField("quantite_reel",$quantite_reel);
+
+
+				$total_prod += ($v['Productiondetail']['quantite_reel'] * $v['Produit']['prixachat']);
 			}
-			
+		
 		$total_prod /= $this->request->data['Production']['quantite_prod'];
 		
 		$this->Production->id = $this->request->data['Production']['id'];
@@ -175,7 +180,7 @@ class ProductionsController extends AppController {
 	// public function Ajouter une nouvel OF {
 	public function edit($id = null) {
 
-		
+	
 
 		$store_type = $this->Session->read('Auth.User.StoreSession.type');
 		$role_id = $this->Session->read('Auth.User.role_id');
@@ -242,6 +247,8 @@ class ProductionsController extends AppController {
 	}
 
 	public function view($id = null) {
+		
+
 		$role_id = $this->Session->read('Auth.User.role_id');
 		$user_id = $this->Session->read('Auth.User.id');
 		$admins = $this->Session->read('admins');
@@ -324,6 +331,9 @@ class ProductionsController extends AppController {
 	}
 
 	public function editdetail($id = null,$production_id = null) {
+
+		
+
 		$role_id = $this->Session->read('Auth.User.role_id');
 		$admins = $this->Session->read('admins');
 
