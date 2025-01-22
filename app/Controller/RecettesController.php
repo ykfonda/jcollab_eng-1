@@ -304,6 +304,11 @@ class RecettesController extends AppController {
 				if (!empty($file_name)) move_uploaded_file($file_tmp, $dest_dossier.$file_name);
 			}
 			$this->request->data['Produit']['type'] = 1;
+
+			// Construire l'EAN13 en concaténant les parties
+			$EAN13 = "2900" . $code_barre . "000000";
+			$this->request->data['Produit']['ean13'] = $EAN13;
+			
 			if ($this->Produit->save($this->request->data)) {
 				$this->Session->setFlash('L\'enregistrement a été effectué avec succès.','alert-success');
 				return $this->redirect(array('action' => 'view',$this->Produit->id));
