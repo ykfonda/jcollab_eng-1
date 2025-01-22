@@ -23,16 +23,39 @@
     <div class="row">
       <?php echo $this->Form->input('id'); ?>
       <div class="col-md-10">
-        <div class="form-group row">
-          <label class="control-label col-md-2">Référence</label>
-          <div class="col-md-3">
-            <?php echo $this->Form->input('reference', ['class' => 'form-control', 'label' => false, 'readonly' => true]); ?>
+
+      <div class="form-group row">
+          <div class="col-md-4">
+            <label class="control-label">Référence</label>
+            <?php echo $this->Form->input('reference', [
+              'class' => 'form-control', 
+              'label' => false, 
+              'readonly' => true
+            ]); ?>
           </div>
-          <label class="control-label col-md-2">Date création</label>
-          <div class="col-md-3">
-            <?php echo $this->Form->input('date', ['class' => 'form-control', 'label' => false, 'readonly' => true, 'type' => 'text', 'default' => date('d-m-Y')]); ?>
+
+          <div class="col-md-4">
+            <label class="control-label">EAN13</label>
+            <?php echo $this->Form->input('ean13', [
+              'class' => 'form-control', 
+              'label' => false, 
+              'readonly' => true
+            ]); ?>
+          </div>
+
+          <div class="col-md-4">
+            <label class="control-label">Date création</label>
+            <?php echo $this->Form->input('date', [
+              'class' => 'form-control', 
+              'label' => false, 
+              'readonly' => true, 
+              'type' => 'text', 
+              'default' => date('d-m-Y')
+            ]); ?>
           </div>
         </div>
+
+
         <div class="form-group row">
           <label class="control-label col-md-2">Libellé</label>
           <div class="col-md-8">
