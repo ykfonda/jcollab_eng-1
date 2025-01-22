@@ -171,7 +171,12 @@ class ProductionsController extends AppController {
 
 	}
 
+
+	// public function Ajouter une nouvel OF {
 	public function edit($id = null) {
+
+		
+
 		$store_type = $this->Session->read('Auth.User.StoreSession.type');
 		$role_id = $this->Session->read('Auth.User.role_id');
 		$user_id = $this->Session->read('Auth.User.id');
@@ -186,20 +191,25 @@ class ProductionsController extends AppController {
 					$ingredients = $this->Production->Productiondetail->Produit->Produitingredient->find('all',[
 						'conditions' => [ 'produit_id' => $this->request->data['Production']['produit_id'] ],
 						'contain' => ["Produit"],
-					
-						
 					]);
-					
 					$total_theo = 0;
+					// Retrieve qteofeco from the Produit table
+					$produit = $this->Production->Productiondetail->Produit->find('first', [
+						'conditions' => ['Produit.id' => $this->request->data['Production']['produit_id']],
+						'fields' => ['qteofeco']
+					]);
+					$qteofeco = $produit['Produit']['qteofeco'];
+					$coefficient = $this->request->data['Production']['quantite'] / $qteofeco;
+
+					// recuperation des ingredients
 					foreach ($ingredients as $v) {
 						$this->request->data['Productiondetail'][] = [
-							'quantite_theo' => $this->request->data['Production']['quantite'] * $v['Produitingredient']['quantite'],
+							'quantite_theo' => $coefficient * $v['Produitingredient']['quantite'],
 							'produit_id' => $v['Produitingredient']['ingredient_id'],
 						];
-						$total_theo += ($this->request->data['Production']['quantite'] * $v['Produitingredient']['quantite'] * $v['Produit']['prixachat']);
-						
+						$total_theo += ($coefficient * $v['Produitingredient']['quantite'] * $v['Produit']['prixachat']);
 					}
-					
+
 					$total_theo /= $this->request->data['Production']['quantite'];
 					$this->request->data['Production']['prix_theo'] = $total_theo;
 					$this->request->data['Production']['user_id'] = $this->Session->read('Auth.User.id');

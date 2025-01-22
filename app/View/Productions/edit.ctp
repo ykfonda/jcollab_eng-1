@@ -3,7 +3,7 @@
 		<?php if ( isset($this->data['Production']['id']) ): ?>
 			Modifier une production
 		<?php else: ?>
-			Nouvelle production
+			Nouvelle OF
 		<?php endif ?>
 	</h4>
 </div>
@@ -39,7 +39,7 @@
 			</div>
 			<div class="form-group row">
 				
-				<label class="control-label col-md-2">Quantité</label>
+				<label class="control-label col-md-2">Quantité à produire</label>
 				<div class="col-md-3">
 					<?php if ( isset($this->data['Production']['id']) ): ?>
 						<?php echo $this->Form->input('quantite',['class' => 'form-control','label'=>false,'required' => true,'disabled' => true,'min'=>0,'step'=>'any']); ?>
