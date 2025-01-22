@@ -193,6 +193,10 @@
           <div class="col-md-3">
             <?php echo $this->Form->input('type_of', ['class' => 'form-control', 'label' => false, 'required' => true, 'options' => ['auto' => 'Automatique', 'man' => 'Manuelle']]); ?>
           </div>
+          <label class="control-label col-md-2">Quantité économique</label>
+          <div class="col-md-3">
+          <?php echo $this->Form->input('qteofeco', ['class' => 'form-control', 'label' => false, 'required' => false]); ?>
+          </div>
         </div>
         <div class="form-group row">
           <label class="control-label col-md-2">Type Conditionnement</label>
