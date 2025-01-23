@@ -177,7 +177,7 @@ class ProductionsController extends AppController {
 	}
 
 
-	// public function Ajouter une nouvel OF {
+	// public function : Ajouter une nouvel OF {
 	public function edit($id = null) {
 		$store_type = $this->Session->read('Auth.User.StoreSession.type');
 		$role_id = $this->Session->read('Auth.User.role_id');
@@ -208,8 +208,8 @@ class ProductionsController extends AppController {
 						$this->request->data['Productiondetail'][] = [
 							'quantite_theo' => $coefficient * $v['Produitingredient']['quantite']*(1+$v['Produitingredient']['pourcentage_perte']/100),
 							'produit_id' => $v['Produitingredient']['ingredient_id'],
+							'prix_achat' => $v['Produit']['prixachat'],
 						];
-
 						$total_theo += ($coefficient * $v['Produitingredient']['quantite'] * $v['Produit']['prixachat']*(1+$v['Produitingredient']['pourcentage_perte']/100));
 					}
 
@@ -222,6 +222,7 @@ class ProductionsController extends AppController {
 					return $this->redirect($this->referer());
 				}
 			}
+
 			if ($this->Production->saveAssociated($this->request->data)) {
 				$this->Session->setFlash('L\'enregistrement a été effectué avec succès.','alert-success');
 				return $this->redirect(['action'=>'view',$this->Production->id]);
