@@ -1,7 +1,7 @@
 <div class="hr"></div>
 <div class="card">
   <div class="card-header">
-      <h4 class="card-title">Production</h4>
+      <h4 class="card-title">Centre de production</h4>
       <div class="heading-elements">
           <ul class="list-inline mb-0">
               <li>
