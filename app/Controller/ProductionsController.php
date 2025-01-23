@@ -139,10 +139,9 @@ class ProductionsController extends AppController {
 		$this->set(compact('produits','count'));
 		$this->layout = false;
 	}
+
+	// Sauvegarde de la production
 	public function updateProduction() {
-
-		
-
 		$quantite_prod = $this->request->data['Production']['quantite_prod'];
 		$this->Production->id = $this->request->data['Production']['id'];
 		$this->Production->saveField("quantite_prod",$quantite_prod);
@@ -163,7 +162,7 @@ class ProductionsController extends AppController {
 				// $this->Production->Productiondetail->saveField("quantite_reel",$quantite_reel);
 
 
-				$total_prod += ($v['Productiondetail']['quantite_reel'] * $v['Produit']['prixachat']);
+				$total_prod += ($v['Productiondetail']['quantite_reel'] * $v['Productiondetail']['prix_achat']);
 			}
 		
 		$total_prod /= $this->request->data['Production']['quantite_prod'];
