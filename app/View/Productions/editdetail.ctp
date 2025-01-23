@@ -23,7 +23,7 @@
 					</div>
 					<label class="control-label col-md-1">Quantité</label>
 					<div class="col-md-3">
-						<?php echo $this->Form->input('quantite_reel',['class' => 'form-control','label'=>false,'required' => true,'min'=>0,'step'=>'any','max'=>$this->data['Productiondetail']['quantite_theo'] ]); ?>
+						<?php echo $this->Form->input('quantite_reel',['class' => 'form-control','label'=>false,'required' => true,'min'=>0,'step'=>'any']); ?>
 					</div>
 				</div>
 			</div>
