@@ -37,7 +37,7 @@
             <table class="table table-bordered tableHeadInformation">
               <tbody>
                 <tr>
-                  <td class="tableHead" nowrap="">Référence</td>
+                  <td class="tableHead" nowrap="">Référence OF</td>
                   <td nowrap="">
                     <?php echo $this->data['Production']['reference'] ?>
                   </td>
@@ -68,7 +68,7 @@
                   
                 </tr>
                 <tr>
-                <td class="tableHead" nowrap="">Quantité Theo</td>
+                <td class="tableHead" nowrap="">Quantité à produire</td>
                   <td nowrap=""> 
                     <?php echo $this->data['Production']['quantite'] ?>
                   </td>
@@ -80,7 +80,7 @@
                 </tr>
                 <tr>
                 
-                  <td class="tableHead" nowrap="">Quantite Prod</td>
+                  <td class="tableHead" nowrap="">Quantité produite</td>
                   <td nowrap="">
                   
                   <?php if($this->data['Production']['statut'] == 1 ) echo $this->Form->input('quantite_prod',['class' => 'form-control','label'=>false,'required' => true,'disabled' => true,'min'=>0,'default' => $this->data['Production']['quantite_prod'],'step'=>'any']);
@@ -132,7 +132,7 @@
                 <tr>
                   <th nowrap="">Désignation</th>
                   <th nowrap="">Qté théo</th>
-                  <th nowrap="">Qté Réelle</th>
+                  <th nowrap="">Qté Consommée</th>
                   <th nowrap="">Unité</th>
                   <th nowrap="">Prix</th>
                   <th nowrap="">Total Théo</th>

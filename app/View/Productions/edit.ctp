@@ -17,7 +17,7 @@
 				<div class="col-md-3">
 					<?php echo $this->Form->input('libelle',['class' => 'form-control','label'=>false,'required' => true]); ?>
 				</div>
-				<label class="control-label col-md-2">Date</label>
+				<label class="control-label col-md-2">Date fabrication</label>
 				<div class="col-md-3">
 					<?php echo $this->Form->input('date',['class' => 'date-picker form-control','label'=>false,'required' => true,'type'=>'text','default'=>date('d-m-Y')]); ?>
 				</div>
