@@ -149,9 +149,10 @@
                   <th nowrap="" class="text-right"><?php echo $tache['Productiondetail']['quantite_theo'] ?></th>
                   <th nowrap="" class="text-right"><?php echo $tache['Productiondetail']['quantite_reel'] ?></th>
                   <th nowrap=""><?php echo ( isset($tache['Produit']['Unite']['id']) ) ? $tache['Produit']['Unite']['libelle'] : 'Non-définie' ; ?></th>
-                  <th nowrap="" class="text-right"><?php echo number_format($tache['Produit']['prixachat'], 2, ',', ' ') ?></th>
-                  <th nowrap="" class="text-right"><?php echo number_format($tache['Produit']['prixachat']*$tache['Productiondetail']['quantite_theo'], 2, ',', ' ') ?></th>
-                  <th nowrap="" class="text-right"><?php echo number_format($tache['Produit']['prixachat']*$tache['Productiondetail']['quantite_reel'], 2, ',', ' ') ?></th>
+                  <th nowrap="" class="text-right">
+                  <?php echo number_format($tache['Productiondetail']['prix_achat'], 2, ',', ' ') ?></th>
+                  <th nowrap="" class="text-right"><?php echo number_format($tache['Productiondetail']['prix_achat']*$tache['Productiondetail']['quantite_theo'], 2, ',', ' ') ?></th>
+                  <th nowrap="" class="text-right"><?php echo number_format($tache['Productiondetail']['prix_achat']*$tache['Productiondetail']['quantite_reel'], 2, ',', ' ') ?></th>
                   <?php if (isset($this->data['Production']['statut']) AND $this->data['Production']['statut'] == -1  ): ?>
                   <th class="actions" nowrap="">
                     <?php if ($globalPermission['Permission']['m1']): ?>
