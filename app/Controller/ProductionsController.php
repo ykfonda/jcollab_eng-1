@@ -145,38 +145,67 @@ class ProductionsController extends AppController {
 
 	// Sauvegarde de la production
 	public function updateProduction() {
+		// Récupérer la quantité produite
 		$quantite_prod = $this->request->data['Production']['quantite_prod'];
+	
+		// Vérifier que la quantité produite est valide
+		if (empty($quantite_prod) || !is_numeric($quantite_prod) || $quantite_prod <= 0) {
+			$this->Session->setFlash('Quantité produite invalide.', 'alert-danger');
+			return $this->redirect(['action' => 'view', $this->request->data['Production']['id']]);
+		}
+	
+		// Mettre à jour la quantité produite
 		$this->Production->id = $this->request->data['Production']['id'];
-		$this->Production->saveField("quantite_prod",$quantite_prod);
-
-		$details = $this->Production->Productiondetail->find('all',[
+		$this->Production->saveField("quantite_prod", $quantite_prod);
+	
+		// Mettre à jour la date actuelle
+		$currentDate = date('Y-m-d H:i:s'); // Format MySQL datetime
+		$this->Production->saveField("date", $currentDate);
+	
+		// Trouver les détails de la production
+		$details = $this->Production->Productiondetail->find('all', [
 			'conditions' => ['Productiondetail.production_id' => $this->request->data['Production']['id']],
-			'contain'=>['Produit' => ['Unite'] ,'Production'],
+			'contain' => ['Produit' => ['Unite'], 'Production'],
 		]);
-
-		$total_prod = 0;	
+	
+		$total_prod = 0; // Initialiser le total
 		foreach ($details as $v) {
-			$ingredients = $this->Production->Productiondetail->Produit->Produitingredient->find('first',[
-				'conditions' => [ 'produit_id' => $v['Production']['produit_id'],'ingredient_id' => $v['Productiondetail']['produit_id'] ],
-				'contain' => ["Produit"],	
+			// Trouver les ingrédients associés
+			$ingredients = $this->Production->Productiondetail->Produit->Produitingredient->find('first', [
+				'conditions' => ['produit_id' => $v['Production']['produit_id'], 'ingredient_id' => $v['Productiondetail']['produit_id']],
+				'contain' => ["Produit"],
 			]);
-				//$quantite_reel =  $this->request->data['Production']['quantite_prod'] * $ingredients['Produitingredient']['quantite'];
-				$this->Production->Productiondetail->id = $v['Productiondetail']['id'];
-				// $this->Production->Productiondetail->saveField("quantite_reel",$quantite_reel);
-
-
-				$total_prod += ($v['Productiondetail']['quantite_reel'] * $v['Productiondetail']['prix_achat']);
-			}
-		
-		$total_prod /= $this->request->data['Production']['quantite_prod'];
-		
-		$this->Production->id = $this->request->data['Production']['id'];
-		$this->Production->saveField("prix_prod",$total_prod);
-
-		$this->Session->setFlash('L\'enregistrement a été effectué avec succès.','alert-success');
-		return $this->redirect(['action'=>'view',$this->Production->id]);
-
+	
+			// Calculer la quantité réelle (désactivé dans votre code, à réactiver si nécessaire)
+			// $quantite_reel = $this->request->data['Production']['quantite_prod'] * $ingredients['Produitingredient']['quantite'];
+			// $this->Production->Productiondetail->id = $v['Productiondetail']['id'];
+			// $this->Production->Productiondetail->saveField("quantite_reel", $quantite_reel);
+	
+			// Ajouter au total
+			$total_prod += ($v['Productiondetail']['quantite_reel'] * $v['Productiondetail']['prix_achat']);
+		}
+	
+		// Éviter la division par zéro
+		if ($quantite_prod > 0) {
+			$total_prod /= $quantite_prod;
+		} else {
+			$total_prod = 0; // Si la quantité produite est zéro, mettre un total par défaut
+		}
+	
+		// Vérifier que le total est valide avant de sauvegarder
+		if (is_numeric($total_prod)) {
+			$this->Production->saveField("prix_prod", $total_prod);
+		} else {
+			$this->Session->setFlash('Le calcul du prix de production a échoué.', 'alert-danger');
+			return $this->redirect(['action' => 'view', $this->request->data['Production']['id']]);
+		}
+	
+		// Message de confirmation
+		$this->Session->setFlash('L\'enregistrement a été effectué avec succès.', 'alert-success');
+		return $this->redirect(['action' => 'view', $this->Production->id]);
 	}
+	
+	
 
 
 	// public function : Ajouter une nouvel OF {
@@ -370,7 +399,32 @@ class ProductionsController extends AppController {
 	}
 
 
-	
+	public function calculateDlc($dateProduction, $nombreJours)
+	{
+		// Vérifier que les paramètres sont valides
+		if (empty($dateProduction) || !is_numeric($nombreJours)) {
+			return 'Paramètres invalides';
+		}
+
+		// Convertir la date de production en objet DateTime
+		try {
+			$date = new DateTime($dateProduction);
+		} catch (Exception $e) {
+			return 'Format de date invalide';
+		}
+
+		// Ajouter les jours à la date
+		$date->modify("+$nombreJours days");
+
+		// Retourner la DLC au format YYYY-MM-DD
+		return $date->format('Y-m-d');
+
+
+		var_dump($date->format('Y-m-d'));
+
+	}
+
+
 
 	public function generateProductionPdf($production_id = null)
 {

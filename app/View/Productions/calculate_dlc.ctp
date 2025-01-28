@@ -46,7 +46,7 @@
                   <td nowrap="">
                     <?php echo $this->data['Production']['reference'] ?>
                   </td>
-                  <td class="tableHead" nowrap="">Date de production</td>
+                  <td class="tableHead" nowrap="">Date</td>
                   <td nowrap=""> 
                     <?php echo $this->data['Production']['date'] ?>
                   </td>
@@ -106,10 +106,7 @@
                   </td>
                     <td class="tableHead" nowrap="">Num lot</td>
                     <td nowrap="">
-                     <?php //echo $this->data['Production']['numlot'] ?>
-
-                     <p>DLC calculée : <?php echo $dlc; ?></p>
-
+                     <?php echo $this->data['Production']['numlot'] ?>
                     </td>  
                   </td>
                 </tr>
