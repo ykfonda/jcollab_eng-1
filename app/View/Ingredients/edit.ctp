@@ -203,6 +203,7 @@
             <?php echo $this->Form->input('num_lot', ['class' => 'uniform form-control', 'label' => 'Geré Par Lot', 'type' => 'checkbox']); ?>
           </div>
 		</div>
+
         <div class="form-group row">
           <label class="control-label col-md-2">Type Conditionnement</label>
           <div class="col-md-8">
@@ -214,6 +215,7 @@
             </select>
           </div>
         </div>
+		
 			<div class="form-group row">
 				<label class="control-label col-md-2">Option</label>
 				<div class="col-md-8 ">
