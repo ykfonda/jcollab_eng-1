@@ -148,36 +148,47 @@ class ProductionsController extends AppController {
 	// Sauvegarde de la production
 	public function updateProduction() {
 
-
-		// Récupérer la configuration de l'application
-		$this->loadModel('Config');
-		$Config_app = $this->Config->find('first');
-		// Récupérer le compteur de lots
-		$lot_counter 		= $Config_app['Config']['lot_counter'];
-		$lotNumber = $this->generateLotNumber($lot_counter);
-
-			// $dateProduction, $nombreJours
-			// $dlc_date = $this->calculateDlc($currentDate, );
-
-
-
-
-		// Récupérer la quantité produite
+		// Récupérer les données soumises
 		$quantite_prod = $this->request->data['Production']['quantite_prod'];
-	
+		$recette_dlc_jour = $this->request->data['Production']['recette_dlc_jour'];
+		$quantite_prod_old = $this->request->data['Production']['quantite_prod_old'];
+		
 		// Vérifier que la quantité produite est valide
 		if (empty($quantite_prod) || !is_numeric($quantite_prod) || $quantite_prod <= 0) {
 			$this->Session->setFlash('Quantité produite invalide.', 'alert-danger');
 			return $this->redirect(['action' => 'view', $this->request->data['Production']['id']]);
 		}
-	
-		// Mettre à jour la quantité produite
-		$this->Production->id = $this->request->data['Production']['id'];
-		$this->Production->saveField("quantite_prod", $quantite_prod);
-	
-		// Mettre à jour la date actuelle
-		$currentDate = date('Y-m-d H:i:s'); // Format MySQL datetime
-		$this->Production->saveField("date", $currentDate);
+
+		// Récupérer la configuration de l'application
+		$this->loadModel('Config');
+		$Config_app = $this->Config->find('first');
+		// 1 - Compteur de lots
+		$lot_counter 		= $Config_app['Config']['lot_counter'];
+		$lotNumber = $this->generateLotNumber($lot_counter);
+
+		// 2 - Date de production
+		$currentDate = date('Y-m-d'); // Format MySQL date
+
+		// 3 - Date de péremption
+		$dlc_date = $this->calculateDlc($currentDate, $recette_dlc_jour);
+
+
+			// Mettre à jour les données de production
+			$this->request->data['Production']['quantite_prod'] = $quantite_prod;
+
+			if ($quantite_prod_old == null or empty($quantite_prod_old)) {
+				$this->request->data['Production']['date'] = $currentDate;
+				$this->request->data['Production']['numlot'] = $lotNumber;
+				$this->request->data['Production']['dlc'] = $dlc_date;
+			}
+
+			// Sauvegarder toutes les données en une seule fois
+			if ($this->Production->save($this->request->data['Production'])) {
+				$this->Session->setFlash('La production a été mise à jour avec succès.', 'alert-success');
+			} else {
+				$this->Session->setFlash('Erreur lors de la mise à jour de la production.', 'alert-danger');
+			}
+
 	
 		// Trouver les détails de la production
 		$details = $this->Production->Productiondetail->find('all', [
@@ -413,10 +424,8 @@ class ProductionsController extends AppController {
 		} else { unset( $data ); return false; }
 	}
 
+
 	public function editdetail($id = null,$production_id = null) {
-
-		
-
 		$role_id = $this->Session->read('Auth.User.role_id');
 		$admins = $this->Session->read('admins');
 

@@ -88,10 +88,35 @@
                   <td class="tableHead" nowrap="">Quantité produite</td>
                   <td nowrap="">
                   
-                  <?php if($this->data['Production']['statut'] == 1 ) echo $this->Form->input('quantite_prod',['class' => 'form-control','label'=>false,'required' => true,'disabled' => true,'min'=>0,'default' => $this->data['Production']['quantite_prod'],'step'=>'any']);
-                  else echo $this->Form->input('quantite_prod',['class' => 'form-control','label'=>false,'required' => true,'min'=>0,'default' => $this->data['Production']['quantite_prod'],'step'=>'any']); ?>  
+                  <?php 
+                  // Afficher le champ en mode disabled si la production est validée
+                  if($this->data['Production']['statut'] == 1 ) echo $this->Form->input('quantite_prod',['class' => 'form-control','label'=>false,'required' => true,'disabled' => true,'min'=>0,'default' => $this->data['Production']['quantite_prod'],'step'=>'any']);
+                  else echo $this->Form->input('quantite_prod',['class' => 'form-control','label'=>false,'required' => true,'min'=>0,'default' => $this->data['Production']['quantite_prod'],'step'=>'any']);
+
+                  // Afficher l'input de quantite_prod_old en mode hidden
+                  echo $this->Form->input('quantite_prod_old', [
+                    'type' => 'hidden',
+                    'label' => false,
+                    'required' => true,
+                    'default' => $this->data['Production']['quantite_prod'], 
+                    'step' => 'any',
+                ]);
+
+                  // Afficher l'input de recette_dlc_jour en mode disabled si la production est validée
+                  echo $this->Form->input('recette_dlc_jour', [
+                    'type' => 'hidden',
+                    'label' => false,
+                    'required' => true,
+                    'default' => $this->data['Production']['recette_dlc_jour'], 
+                    'step' => 'any',
+                ]);
+
+
+                   ?>  
                   </td>
-                  <?php echo $this->Form->end(); ?>
+                  <?php 
+                  // End of the form
+                  echo $this->Form->end(); ?>
                   <td class="tableHead" nowrap="">Prix Prod</td>
                   <td nowrap="">
                   <?php echo $this->data['Production']['prix_prod'] ?>
@@ -116,19 +141,22 @@
                 <td class="tableHead" nowrap="">Durée de validité (jours)</td>
                   <td nowrap="">
                   <?php 
-                            echo $this->Form->input('recette_dlc_jour', [
-                              'class' => 'form-control',
-                              'label' => false,
-                              'required' => true,
-                              'disabled' => true,
-                              'default' => $this->data['Production']['recette_dlc_jour'], // Utiliser la valeur par défaut
-                              'step' => 'any',
-                          ]);
-                        ?>
+                     if (!empty($this->data['Production']['recette_dlc_jour'])) {
+                      echo $this->data['Production']['recette_dlc_jour']." Jours";
+                  } else {
+                      echo "Durée non définie";
+                  } 
+                  ?>
                   </td>
                     <td class="tableHead" nowrap="">DLC de produit</td>
                     <td nowrap="">
-                     <p><?php echo $dlc; ?></p>
+                      <?php 
+                          if (!empty($this->data['Production']['dlc'])) {
+                            echo date('d-m-Y', strtotime($this->data['Production']['dlc']));
+                        } else {
+                            echo "Date non définie";
+                        }
+                    ?>
                     </td>  
                   </td>
                 </tr>
