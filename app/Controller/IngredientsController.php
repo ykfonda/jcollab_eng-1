@@ -305,8 +305,16 @@ class IngredientsController extends AppController
             $this->request->data['Produit']['type'] = 2;
             $dataConditionnement = (isset($this->request->data['Produit']['type_conditionnement1'])) ? $this->request->data['Produit']['type_conditionnement1'] : '';
             $dataOptions = (isset($this->request->data['Produit']['options1'])) ? $this->request->data['Produit']['options1'] : '';
-            unset($this->request->data['Produit']['type_conditionnement']);
-            unset($this->request->data['Produit']['options']);
+            // unset($this->request->data['Produit']['type_conditionnement']);
+            // unset($this->request->data['Produit']['options']);
+
+
+
+    if (isset($this->request->data['Produit']['type_conditionnement']) && is_array($this->request->data['Produit']['type_conditionnement'])) {
+        $this->request->data['Produit']['type_conditionnement'] = json_encode($this->request->data['Produit']['type_conditionnement']);
+    }
+
+
             ///call api
             if ($id != null) {
                 $options = ['conditions' => ['Produit.'.$this->Produit->primaryKey => $id]];
@@ -356,6 +364,9 @@ class IngredientsController extends AppController
                     }
                 }
             }
+
+           // die(var_dump($this->request->data));
+
             if ($this->Produit->save($this->request->data)) {
                 if ($id == null) {
                     $id = $this->Produit->getLastInsertId();
