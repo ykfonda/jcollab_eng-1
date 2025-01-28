@@ -97,22 +97,42 @@
                   <?php echo $this->data['Production']['prix_prod'] ?>
                   </td>
                 </tr>
+
                 <tr>
                 <td class="tableHead" nowrap="">Statut</td>
                   <td nowrap="">
                     <?php if ( !empty( $this->data['Production']['statut'] ) ): ?>
-                      <div class="badge badge-default" style="width: 100%;color:white;background-color: <?php echo $this->App->getValideEntreeColor( $this->data['Production']['statut'] ) ?>;"><?php echo $this->App->getValideEntree( $this->data['Production']['statut'] ) ?></div>
+                      <div class="badge badge-default" style="width: 70%;color:white;background-color: <?php echo $this->App->getValideEntreeColor( $this->data['Production']['statut'] ) ?>;"><?php echo $this->App->getValideEntree( $this->data['Production']['statut'] ) ?></div>
                     <?php endif ?>
                   </td>
                     <td class="tableHead" nowrap="">Num lot</td>
                     <td nowrap="">
-                     <?php //echo $this->data['Production']['numlot'] ?>
-
-                     <p>DLC calculée : <?php echo $dlc; ?></p>
-
+                     <?php echo $this->data['Production']['numlot'] ?>
                     </td>  
                   </td>
                 </tr>
+
+                <tr>
+                <td class="tableHead" nowrap="">Durée de validité (jours)</td>
+                  <td nowrap="">
+                  <?php 
+                            echo $this->Form->input('recette_dlc_jour', [
+                              'class' => 'form-control',
+                              'label' => false,
+                              'required' => true,
+                              'disabled' => true,
+                              'default' => $this->data['Production']['recette_dlc_jour'], // Utiliser la valeur par défaut
+                              'step' => 'any',
+                          ]);
+                        ?>
+                  </td>
+                    <td class="tableHead" nowrap="">DLC de produit</td>
+                    <td nowrap="">
+                     <p><?php echo $dlc; ?></p>
+                    </td>  
+                  </td>
+                </tr>
+
               </tbody>
             </table>
           </div>
