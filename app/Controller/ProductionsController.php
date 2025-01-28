@@ -1,4 +1,7 @@
 <?php
+
+App::import('Vendor', 'dompdf', array('file' => 'dompdf' . DS . 'dompdf_config.inc.php'));
+
 class ProductionsController extends AppController {
 	public $idModule = 131;
 	
@@ -245,8 +248,6 @@ class ProductionsController extends AppController {
 	}
 
 	public function view($id = null) {
-		
-
 		$role_id = $this->Session->read('Auth.User.role_id');
 		$user_id = $this->Session->read('Auth.User.id');
 		$admins = $this->Session->read('admins');
@@ -367,4 +368,159 @@ class ProductionsController extends AppController {
 		}
 		return $this->redirect( $this->referer() );
 	}
+
+
+	
+
+	public function generateProductionPdf($production_id = null)
+{
+    $user_id = $this->Session->read('Auth.User.id');
+    $details = [];
+
+    if ($this->Production->exists($production_id)) {
+        // Fetch production data
+        $options = [
+            'contain' => [],
+            'conditions' => ['Production.' . $this->Production->primaryKey => $production_id]
+        ];
+        $data = $this->Production->find('first', $options);
+
+        // Fetch production details
+        $details = $this->Production->Productiondetail->find('all', [
+            'conditions' => ['Productiondetail.production_id' => $production_id],
+            'contain' => ['Produit'],
+        ]);
+    }
+
+    if (empty($details)) {
+        $this->Session->setFlash('Aucun détail trouvé pour cette production.', 'alert-danger');
+        return $this->redirect($this->referer());
+    }
+
+    $societe = $this->GetSociete();
+
+    // Helper instance
+    App::uses('LettreHelper', 'View/Helper');
+    $LettreHelper = new LettreHelper(new View());
+
+    $view = new View($this, false);
+    $style = $view->element('style', ['societe' => $societe]);
+    $footer = $view->element('footer', ['societe' => $societe]);
+
+    // Title
+    $title = '
+    <div style="text-align:center; margin-top: 50px; margin-bottom: 30px;">
+        <h3 style="text-transform: uppercase; font-size: 18px; font-weight: bold; margin: 0;">Ordre de fabrication</h3>
+    </div>';
+
+    // Header with production details
+    $header = '
+    <table width="100%" style="border-collapse: collapse; font-size: 12px; margin-bottom: 20px;">
+        <tr>
+            <td style="width:20%; text-align:left;"><strong>Référence OF</strong></td>
+            <td style="width:30%; text-align:left;">' . $data['Production']['reference'] . '</td>
+            <td style="width:20%; text-align:left;"><strong>Date</strong></td>
+            <td style="width:30%; text-align:left;">' . $data['Production']['date'] . '</td>
+        </tr>
+        <tr>
+            <td style="text-align:left;"><strong>Objet</strong></td>
+            <td style="text-align:left;">OF CLIENT</td>
+            <td style="text-align:left;"><strong>Responsable</strong></td>
+            <td style="text-align:left;">SADEK HASSAN</td>
+        </tr>
+        <tr>
+            <td style="text-align:left;"><strong>Produit</strong></td>
+            <td style="text-align:left;">TEST RECETTE</td>
+            <td style="text-align:left;"><strong>Dépôt</strong></td>
+            <td style="text-align:left;">COMPTOIR</td>
+        </tr>
+        <tr>
+            <td style="text-align:left;"><strong>Quantité à produire</strong></td>
+            <td style="text-align:left;">123.000</td>
+            <td style="text-align:left;"><strong>Prix Theo</strong></td>
+            <td style="text-align:left;">41.1882</td>
+        </tr>
+        <tr>
+            <td style="text-align:left;"><strong>Quantité produite</strong></td>
+            <td style="text-align:left;">120.000</td>
+            <td style="text-align:left;"><strong>Prix Prod</strong></td>
+            <td style="text-align:left;">36.1883</td>
+        </tr>
+        <tr>
+            <td style="text-align:left;"><strong>Statut</strong></td>
+            <td colspan="3" style="text-align:center; background-color:#d1edf5; font-weight:bold;">En attente</td>
+        </tr>
+    </table>';
+
+    // Build the full HTML
+    $html = '
+    <html>
+        <head>
+            <title>Fiche de Production</title>
+            ' . $style . '
+        </head>
+        <body>
+            ' . $title . '
+            ' . $header . '
+            <div>
+                <table class="details" width="100%" style="border-collapse: collapse; margin-top: 20px;">
+                    <thead>
+                        <tr style="background-color: #f2f2f2;">
+                            <th style="border: 1px solid #ddd; padding: 8px;">Produit</th>
+                            <th style="border: 1px solid #ddd; padding: 8px;">Quantité Théorique</th>
+                            <th style="border: 1px solid #ddd; padding: 8px;">Quantité Réelle</th>
+                        </tr>
+                    </thead>
+                    <tbody>';
+
+    foreach ($details as $detail) {
+        $quantite_theo = isset($detail['Productiondetail']['quantite_theo']) ? $detail['Productiondetail']['quantite_theo'] : 0;
+        $quantite_reel = !empty($detail['Productiondetail']['quantite_reel']) ? number_format($detail['Productiondetail']['quantite_reel'], 2, ',', ' ') : '...';
+        $libelle = isset($detail['Produit']['libelle']) ? $detail['Produit']['libelle'] : 'Inconnu';
+
+        $html .= '<tr>
+            <td style="border: 1px solid #ddd; padding: 8px;">' . htmlspecialchars($libelle) . '</td>
+            <td style="border: 1px solid #ddd; padding: 8px; text-align:right;">' . number_format($quantite_theo, 2, ',', ' ') . '</td>
+            <td style="border: 1px solid #ddd; padding: 8px; text-align:center;">' . $quantite_reel . '</td>
+        </tr>';
+    }
+
+    $html .= '
+                    </tbody>
+                </table>
+            </div>
+            ' . $footer . '
+        </body>
+    </html>';
+
+    // Generate PDF
+    $dompdf = new DOMPDF();
+    $dompdf->load_html($html);
+    $dompdf->render();
+    $output = $dompdf->output();
+
+    // Ensure directory exists
+    $destination = WWW_ROOT . 'pdfs' . DS . 'productions';
+    if (!file_exists($destination)) {
+        mkdir($destination, 0700, true);
+    }
+
+    $file_path = $destination . DS . 'Production_' . $data['Production']['reference'] . '.pdf';
+    file_put_contents($file_path, $output);
+
+    // Force download of the file
+    $this->response->file($file_path, [
+        'download' => true,
+        'name' => 'Production_' . $data['Production']['reference'] . '.pdf',
+    ]);
+
+    // Stay on the same page
+    return $this->response;
+}
+
+	
+	
+
+
+
 }
