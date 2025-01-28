@@ -11,9 +11,12 @@
 <div class="portlet light bordered">
 	<div class="portlet-title">
 		<div class="caption">
-			Liste des commandes e-commerce
+			Commandes e-commerce
 		</div>
 		<div class="actions">
+    <?php if ($globalPermission['Permission']['a']): ?>
+        <a href="<?php echo $this->Html->url(['action' => 'syncwebsite']) ?>" class="edit btn btn-primary btn-sm"><i class="fa fa-download"></i> Sync commandes site web </a>
+      <?php endif ?>
 		</div>
 	</div>
 	<div class="portlet-body">
