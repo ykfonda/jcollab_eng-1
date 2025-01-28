@@ -4,7 +4,7 @@ App::import('Vendor', 'dompdf', array('file' => 'dompdf' . DS . 'dompdf_config.i
 
 class ProductionsController extends AppController {
 	public $idModule = 131;
-	public $uses = ['Produit','Production','Productiondetail','Depot','User'];
+	public $uses = ['Produit','Production','Productiondetail'];
 
 
 	public function index() {
@@ -177,9 +177,19 @@ class ProductionsController extends AppController {
 			$this->request->data['Production']['quantite_prod'] = $quantite_prod;
 
 			if ($quantite_prod_old == null or empty($quantite_prod_old)) {
+				// Si la quantité produite est nulle, incrémenter le compteur de lots et mettre à jour la date de production
 				$this->request->data['Production']['date'] = $currentDate;
 				$this->request->data['Production']['numlot'] = $lotNumber;
 				$this->request->data['Production']['dlc'] = $dlc_date;
+
+				 // Sauvegarder la nouvelle valeur dans la table config
+				 $lot_counter_add_one = $lot_counter + 1;
+				 $this->Config->id = $Config_app['Config']['id']; // Définir l'ID de l'enregistrement
+				 if ($this->Config->saveField('lot_counter', $lot_counter_add_one)) {
+					 echo "Compteur de lots mis à jour avec succès.";
+				 } else {
+					 echo "Erreur lors de la mise à jour du compteur de lots.";
+				 }
 			}
 
 			// Sauvegarder toutes les données en une seule fois
