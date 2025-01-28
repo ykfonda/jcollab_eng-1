@@ -17,6 +17,61 @@ class EcommercesController extends AppController
         $this->getPath($this->idModule);
     }
 
+
+
+    public function syncwebsite() {
+        $apiUrl = 'https://lafonda-uat.o2usd.net/rest/api/orders/pending';
+        $username = 'restapi';
+        $password = 'DSDS@$%^&@#';
+
+        // Préparer les données de la requête
+        $postData = [
+            'site' => 1 // Spécifier l'ID du site
+        ];
+
+        // Préparer la requête cURL
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $apiUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+        curl_setopt($ch, CURLOPT_USERPWD, "$username:$password");
+        curl_setopt($ch, CURLOPT_POST, true); // Méthode POST
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postData)); // Ajouter les données JSON
+
+        // Ajouter les en-têtes requis
+        $headers = [
+            'Content-Type: application/json',
+            'Accept: application/json'
+        ];
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        // Exécuter la requête cURL
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if ($httpCode === 200 && $response) {
+            $orders = json_decode($response, true); // Convertir JSON en tableau PHP
+
+            // Vérifier si les données sont valides
+            if (!empty($orders['data']) && $orders['success'] === true) {
+                $this->set('orders', $orders['data']);
+            } else {
+                $this->Session->setFlash(__('No orders found or invalid response from the API.'));
+            }
+        } else {
+            $this->Session->setFlash(__('Unable to fetch data from the API. HTTP Code: ' . $httpCode));
+        }
+
+die(json_encode($httpCode));
+
+        // Fermer la session cURL
+        curl_close($ch);
+    }
+
+
+
+
+
     public function getclient($client_id = null)
     {
         $req = $this->Ecommerce->Client->find('first', ['conditions' => ['id' => $client_id]]);
