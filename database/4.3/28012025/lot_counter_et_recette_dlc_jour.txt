@@ -1,0 +1,6 @@
+ALTER TABLE `configs`
+	ADD COLUMN `lot_counter` INT(4) NULL AFTER `store_id`;
+
+
+ALTER TABLE `productions`
+	ADD COLUMN `recette_dlc_jour` INT(5) NULL AFTER `dlc`;

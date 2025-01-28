@@ -4,7 +4,9 @@ App::import('Vendor', 'dompdf', array('file' => 'dompdf' . DS . 'dompdf_config.i
 
 class ProductionsController extends AppController {
 	public $idModule = 131;
-	
+	public $uses = ['Produit','Production','Productiondetail','Depot','User'];
+
+
 	public function index() {
 		$store_type = $this->Session->read('Auth.User.StoreSession.type');
 		$role_id = $this->Session->read('Auth.User.role_id');
@@ -145,6 +147,21 @@ class ProductionsController extends AppController {
 
 	// Sauvegarde de la production
 	public function updateProduction() {
+
+
+		// Récupérer la configuration de l'application
+		$this->loadModel('Config');
+		$Config_app = $this->Config->find('first');
+		// Récupérer le compteur de lots
+		$lot_counter 		= $Config_app['Config']['lot_counter'];
+		$lotNumber = $this->generateLotNumber($lot_counter);
+
+			// $dateProduction, $nombreJours
+			// $dlc_date = $this->calculateDlc($currentDate, );
+
+
+
+
 		// Récupérer la quantité produite
 		$quantite_prod = $this->request->data['Production']['quantite_prod'];
 	
@@ -167,7 +184,7 @@ class ProductionsController extends AppController {
 			'conditions' => ['Productiondetail.production_id' => $this->request->data['Production']['id']],
 			'contain' => ['Produit' => ['Unite'], 'Production'],
 		]);
-	
+			
 		$total_prod = 0; // Initialiser le total
 		foreach ($details as $v) {
 			// Trouver les ingrédients associés
@@ -226,6 +243,7 @@ class ProductionsController extends AppController {
 						'contain' => ["Produit"],
 					]);
 					$total_theo = 0;
+
 					// Retrieve qteofeco from the Produit table
 					$produit = $this->Production->Productiondetail->Produit->find('first', [
 						'conditions' => ['Produit.id' => $this->request->data['Production']['produit_id']],
@@ -254,6 +272,26 @@ class ProductionsController extends AppController {
 				}
 			}
 
+
+
+			// Récupérer l'ID du produit depuis les données soumises
+			$produit_id = $this->request->data['Production']['produit_id'];
+
+			// Récupérer la valeur de dlc_jours directement depuis la table Produit
+			$produit_details = $this->Produit->find('first', [
+				'conditions' => ['Produit.id' => $produit_id],
+				'fields' => ['dlc_jours']
+			]);
+
+			// Test et affichage de dlc_jours
+			if (!empty($produit_details['Produit']['dlc_jours'])) {
+				$dlc_jours_recette = $produit_details['Produit']['dlc_jours'];
+			} else {
+				$dlc_jours_recette = null; // Valeur par défaut si DLC non défini
+			}
+			
+			$this->request->data['Production']['recette_dlc_jour'] = $dlc_jours_recette;
+
 			if ($this->Production->saveAssociated($this->request->data)) {
 				$this->Session->setFlash('L\'enregistrement a été effectué avec succès.','alert-success');
 				return $this->redirect(['action'=>'view',$this->Production->id]);
@@ -276,6 +314,23 @@ class ProductionsController extends AppController {
 		$this->layout = false;
 	}
 
+	public function generateLotNumber($lot_counter) {
+		// Valider le compteur
+		if (!is_numeric($lot_counter) || $lot_counter < 0) {
+			throw new InvalidArgumentException('Le compteur de lot doit être un entier positif.');
+		}
+	
+		// Obtenir l'année (2 derniers chiffres) et le quantième
+		$year = date('y'); // Année en 2 chiffres (ex. '25' pour 2025)
+		$dayOfYear = str_pad(date('z') + 1, 3, '0', STR_PAD_LEFT); // Quantième (z retourne 0-indexé, on ajoute 1)
+	
+		// Générer le numéro de lot
+		$lotNumber = $year . $dayOfYear . str_pad($lot_counter, 3, '0', STR_PAD_LEFT);
+	
+		return $lotNumber;
+	}
+
+	
 	public function view($id = null) {
 		$role_id = $this->Session->read('Auth.User.role_id');
 		$user_id = $this->Session->read('Auth.User.id');

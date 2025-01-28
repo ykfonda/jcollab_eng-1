@@ -1,2 +1,0 @@
-ALTER TABLE `configs`
-	ADD COLUMN `lot_counter` INT(4) NULL AFTER `store_id`;
