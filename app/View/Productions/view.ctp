@@ -104,9 +104,10 @@
                       <div class="badge badge-default" style="width: 100%;color:white;background-color: <?php echo $this->App->getValideEntreeColor( $this->data['Production']['statut'] ) ?>;"><?php echo $this->App->getValideEntree( $this->data['Production']['statut'] ) ?></div>
                     <?php endif ?>
                   </td>
-                  <td class="tableHead" nowrap=""></td>
-                  <td nowrap="">
-                    
+                    <td class="tableHead" nowrap="">Num lot</td>
+                    <td nowrap="">
+                     <?php echo $this->data['Production']['numlot'] ?>
+                    </td>  
                   </td>
                 </tr>
               </tbody>
