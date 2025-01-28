@@ -305,6 +305,13 @@ class RecettesController extends AppController {
 			}
 			$this->request->data['Produit']['type'] = 1;
 
+			// Récupérer les données de conditionnement et options
+			$dataConditionnement = (isset($this->request->data['Produit']['type_conditionnement1'])) ? $this->request->data['Produit']['type_conditionnement1'] : '';
+            $dataOptions = (isset($this->request->data['Produit']['options1'])) ? $this->request->data['Produit']['options1'] : '';
+            unset($this->request->data['Produit']['type_conditionnement']);
+            unset($this->request->data['Produit']['options']);
+
+
 			// Construire l'EAN13 en concaténant les parties
 			$EAN13 = "2900" . $code_barre . "000000";
 			$this->request->data['Produit']['ean13'] = $EAN13;
@@ -327,7 +334,10 @@ class RecettesController extends AppController {
 		$souscategorieproduits = $this->Produit->Souscategorieproduit->find('list', ['order'=>'libelle asc']);
 		$condtionnements = $this->Produit->Typeconditionnement->findList();
 		$options = $this->Produit->Options->findList();
-		$this->set(compact('categorieproduits','souscategorieproduits','unites','tvas','condtionnements', 'options'));
+
+		
+
+		$this->set(compact('typeconditionnementslibelles', 'optionlibelles','categorieproduits','souscategorieproduits','unites','tvas','condtionnements', 'options'));
 		$this->layout = false;
 	}
 
