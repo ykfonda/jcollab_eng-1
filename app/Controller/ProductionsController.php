@@ -4,7 +4,7 @@ App::import('Vendor', 'dompdf', array('file' => 'dompdf' . DS . 'dompdf_config.i
 
 class ProductionsController extends AppController {
 	public $idModule = 131;
-	public $uses = ['Produit','Production','Productiondetail'];
+	// public $uses = ['Produit','Production','Productiondetail'];
 
 
 	public function index() {
@@ -299,6 +299,7 @@ class ProductionsController extends AppController {
 			$produit_id = $this->request->data['Production']['produit_id'];
 
 			// Récupérer la valeur de dlc_jours directement depuis la table Produit
+			$this->loadModel('Produit');
 			$produit_details = $this->Produit->find('first', [
 				'conditions' => ['Produit.id' => $produit_id],
 				'fields' => ['dlc_jours']
