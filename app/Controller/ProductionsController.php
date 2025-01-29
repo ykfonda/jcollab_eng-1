@@ -542,6 +542,10 @@ class ProductionsController extends AppController {
 	$statut_production =  $data['Production']['statut'];
 	$statut_production_output = $AppHelper->getValideEntree($statut_production);
 
+	$recette_dlc_jour = !empty($data['Production']['recette_dlc_jour']) ? $data['Production']['recette_dlc_jour'] : "Non définie";
+	$dlc = !empty($data['Production']['dlc']) ? date('d/m/Y', strtotime($data['Production']['dlc'])) : "Non définie";
+
+
     // Title
     $title = '
     <div style="text-align:center; margin-top: 5px; margin-bottom: 30px;">
@@ -580,6 +584,12 @@ class ProductionsController extends AppController {
             <td style="text-align:left;">'. $data['Production']['quantite_prod'] .'</td>
             <td style="text-align:left;"><strong>Prix Prod</strong></td>
             <td style="text-align:left;">'.$data['Production']['prix_prod'].'</td>
+        </tr>
+		<tr>
+            <td style="text-align:left;"><strong>Durée de validité (jours)</strong></td>
+            <td style="text-align:left;">'.$recette_dlc_jour .'</td>
+            <td style="text-align:left;"><strong>DLC de produit	</strong></td>
+            <td style="text-align:left;">'.$dlc.'</td>
         </tr>
         <tr>
             <td style="text-align:left;"><strong>Statut</strong></td>
