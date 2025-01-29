@@ -535,9 +535,16 @@ class ProductionsController extends AppController {
     $style = $view->element('style', ['societe' => $societe]);
     $footer = $view->element('footer', ['societe' => $societe]);
 
+	
+
+	App::uses('AppHelper', 'View/Helper');
+	$AppHelper = new AppHelper(new View());
+	$statut_production =  $data['Production']['statut'];
+	$statut_production_output = $AppHelper->getValideEntree($statut_production);
+
     // Title
     $title = '
-    <div style="text-align:center; margin-top: 50px; margin-bottom: 30px;">
+    <div style="text-align:center; margin-top: 5px; margin-bottom: 30px;">
         <h3 style="text-transform: uppercase; font-size: 18px; font-weight: bold; margin: 0;">Ordre de fabrication</h3>
     </div>';
 
@@ -552,7 +559,7 @@ class ProductionsController extends AppController {
         </tr>
         <tr>
             <td style="text-align:left;"><strong>Objet</strong></td>
-            <td style="text-align:left;">OF CLIENT</td>
+            <td style="text-align:left;">' . $data['Production']['libelle'] . '</td>
             <td style="text-align:left;"><strong>Responsable</strong></td>
             <td style="text-align:left;">SADEK HASSAN</td>
         </tr>
@@ -564,19 +571,21 @@ class ProductionsController extends AppController {
         </tr>
         <tr>
             <td style="text-align:left;"><strong>Quantité à produire</strong></td>
-            <td style="text-align:left;">123.000</td>
+            <td style="text-align:left;">'.$data['Production']['quantite'].'</td>
             <td style="text-align:left;"><strong>Prix Theo</strong></td>
-            <td style="text-align:left;">41.1882</td>
+            <td style="text-align:left;">'.$data['Production']['prix_theo'].'</td>
         </tr>
         <tr>
             <td style="text-align:left;"><strong>Quantité produite</strong></td>
-            <td style="text-align:left;">120.000</td>
+            <td style="text-align:left;">'. $data['Production']['quantite_prod'] .'</td>
             <td style="text-align:left;"><strong>Prix Prod</strong></td>
-            <td style="text-align:left;">36.1883</td>
+            <td style="text-align:left;">'.$data['Production']['prix_prod'].'</td>
         </tr>
         <tr>
             <td style="text-align:left;"><strong>Statut</strong></td>
-            <td colspan="3" style="text-align:center; background-color:#d1edf5; font-weight:bold;">En attente</td>
+            <td colspan="3" style="text-align:center; background-color:#d1edf5; font-weight:bold;">
+			'.$statut_production_output.'
+			</td>
         </tr>
     </table>';
 
