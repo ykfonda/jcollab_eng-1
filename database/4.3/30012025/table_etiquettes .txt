@@ -1,0 +1,7 @@
+CREATE TABLE etiquettes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    production_id INT NOT NULL,
+    poids DECIMAL(10,3) NOT NULL,
+    created DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (production_id) REFERENCES productions(id) ON DELETE CASCADE
+);
