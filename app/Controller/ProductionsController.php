@@ -1,6 +1,10 @@
 <?php
 
+App::import('Vendor', 'Escpos', array('file' => 'escpos-php/autoload.php'));
 App::import('Vendor', 'dompdf', array('file' => 'dompdf' . DS . 'dompdf_config.inc.php'));
+
+use Mike42\Escpos\Printer;
+use Mike42\Escpos\PrintConnectors\NetworkPrintConnector;
 
 class ProductionsController extends AppController {
 	public $idModule = 131;
@@ -666,7 +670,178 @@ class ProductionsController extends AppController {
     return $this->response;
 }
 
-	
+
+
+public function etiquettesGood($poids = null) {
+    // Vérifier si la requête est AJAX
+    if ($this->request->is('ajax')) {
+        // Charger escpos-php
+        require_once APP . 'Vendor' . DS . 'escpos-php' . DS . 'autoload.php';
+
+        // 🔹 Vérifier si le poids est passé en POST
+        if ($this->request->is('post')) {
+            if (isset($this->request->data['poids'])) {
+                $poids = floatval($this->request->data['poids']); // Convertir en nombre flottant
+            }
+        }
+
+        // 🔹 Si aucun poids, récupérer depuis la balance
+        if ($poids === null) {
+            $poidsData = json_decode($this->getPoidsBalance(), true);
+            if (!isset($poidsData['poids']) || $poidsData['poids'] <= 0) {
+                echo json_encode(["error" => "Impossible de récupérer le poids depuis la balance."]);
+                exit;
+            }
+            $poids = $poidsData['poids'];
+			//$poids = number_format($poidsData['poids'], 3, '.', ''); // 🔹 Forcer 3 décimales
+        }
+
+        // 🔹 Vérifier le poids reçu
+        // file_put_contents(APP . 'tmp/logs/impression.log', "Poids reçu pour impression : " . $poids . " kg\n", FILE_APPEND);
+		file_put_contents("C:/laragon/www/jcollab/jcollab_eng/app/tmp/logs/impression.log", "Début impression avec poids : " . $poids . "\n", FILE_APPEND);
+
+
+        try {
+            // 🔹 Ajouter un message de confirmation avant d'imprimer
+            echo json_encode(["message" => "Début de l'impression avec poids : " . $poids . " kg"]);
+            flush();
+            sleep(1);
+
+            // Connexion à l'imprimante réseau
+            $connector = new NetworkPrintConnector("192.168.40.40", 9100);
+            $printer = new Printer($connector);
+
+            // Ajout du titre en gras et centré
+            $printer->setJustification(Printer::JUSTIFY_CENTER);
+            $printer->setEmphasis(true);
+            $printer->text("IMPRESSION DU POIDS\n");
+            $printer->setEmphasis(false);
+            $printer->text("----------------------------\n");
+
+            // Alignement à gauche pour le poids
+            $printer->setJustification(Printer::JUSTIFY_LEFT);
+            $printer->text("Poids mesuré : " . number_format($poids, 3, ',', ' ') . " kg\n");
+            $printer->text("----------------------------\n");
+
+            // Ajout de la date et heure d'impression
+            $date = date("d/m/Y H:i:s");
+            $printer->text("Date : " . $date . "\n");
+
+            // Coupure du papier et fermeture de l'imprimante
+            $printer->cut();
+            $printer->close();
+
+            // 🔹 Ajouter un log pour confirmer l'impression
+            file_put_contents(APP . 'tmp/logs/impression.log', "Impression réussie avec poids : " . $poids . " kg\n", FILE_APPEND);
+
+            echo json_encode(["message" => "Impression réussie avec poids : " . $poids . " kg"]);
+            exit;
+        } catch (Exception $e) {
+            file_put_contents(APP . 'tmp/logs/impression.log', "Erreur d'impression : " . $e->getMessage() . "\n", FILE_APPEND);
+            echo json_encode(["error" => "Erreur d'impression : " . $e->getMessage()]);
+            exit;
+        }
+    }
+
+    // Chargement de la vue si ce n'est pas une requête AJAX
+    $this->set('poids', null);
+}
+
+
+public function etiquettes($production_id = null) {
+    if ($this->request->is('ajax')) {
+        require_once APP . 'Vendor' . DS . 'escpos-php' . DS . 'autoload.php';
+
+        $poids = null;
+        if ($this->request->is('post') && isset($this->request->data['poids'])) {
+            $poids = number_format(floatval($this->request->data['poids']), 3, '.', ''); // 🔹 FORCER 3 DÉCIMALES
+        }
+
+        if ($poids === null) {
+            $poidsData = json_decode($this->getPoidsBalance(), true);
+            if (!isset($poidsData['poids']) || $poidsData['poids'] <= 0) {
+                echo json_encode(["error" => "Impossible de récupérer le poids depuis la balance."]);
+                exit;
+            }
+            $poids = number_format($poidsData['poids'], 3, '.', ''); // 🔹 FORCER 3 DÉCIMALES
+        }
+
+        if (!$production_id) {
+            echo json_encode(["error" => "ID de production manquant."]);
+            exit;
+        }
+
+        // 🔹 Sauvegarde en base de données avec format 3 décimales
+        $this->loadModel('Etiquette');
+        $this->Etiquette->save([
+            'Etiquette' => [
+                'production_id' => $production_id,
+                'poids' => (string)$poids // ✅ SAUVEGARDE COMME STRING POUR NE PAS TRONQUER
+            ]
+        ]);
+
+        echo json_encode(["message" => "Étiquette enregistrée avec succès.", "poids" => $poids]);
+        exit;
+    }
+
+    $this->set('production_id', $production_id);
+}
+
+
+
+public function getPoidsBalance() {
+    $ip_balance = '192.168.105.61'; // IP de la balance
+    $port_balance = 8000; // Port de la balance
+
+    $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+    if ($sock === false) {
+        die(json_encode(["error" => "Erreur de création du socket : " . socket_strerror(socket_last_error())]));
+    }
+
+    socket_set_option($sock, SOL_SOCKET, SO_RCVTIMEO, array("sec" => 5, "usec" => 0));
+
+    if (!socket_connect($sock, $ip_balance, $port_balance)) {
+        die(json_encode(["error" => "Erreur de connexion au socket : " . socket_strerror(socket_last_error())]));
+    }
+
+    // 🔹 Envoyer la commande "REQUEST_WEIGHT" à la balance
+    $message = "REQUEST_WEIGHT\n";
+    socket_send($sock, $message, strlen($message), 0);
+
+    // 🔹 Lire la réponse de la balance
+    $data = '';
+    $bytes = socket_recv($sock, $data, 1024, MSG_WAITALL);
+    socket_close($sock);
+
+    if ($bytes === false) {
+        die(json_encode(["error" => "Erreur de réception des données : " . socket_strerror(socket_last_error())]));
+    }
+
+    $data = trim($data);
+
+    // 🔍 Enregistrer les données brutes pour analyse
+    file_put_contents(APP . 'tmp/logs/balance.log', "Données brutes : " . $data . "\n", FILE_APPEND);
+
+    // 🔹 Extraction et nettoyage des données
+    $poids = 0;
+
+    // Utiliser une expression régulière pour extraire uniquement les nombres avec décimales
+    if (preg_match('/([\d]+\.[\d]+)/', $data, $matches)) {
+        $poids = number_format(floatval($matches[1]), 3, '.', ''); // ✅ FORCER 3 DÉCIMALES
+    }
+
+    // 🔍 Ajouter un log du poids détecté
+    file_put_contents(APP . 'tmp/logs/balance.log', "Poids détecté : " . $poids . " kg\n", FILE_APPEND);
+
+    // Retourner le poids en JSON
+    echo json_encode(["poids" => $poids]);
+    exit;
+}
+
+
+
+
+
 	
 
 
