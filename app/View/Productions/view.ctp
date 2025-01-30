@@ -22,7 +22,7 @@
 
               <a href="<?php echo $this->Html->url(['action'=>'generateProductionPdf',$this->data['Production']['id'],1 ]) ?>" class="action btn btn-danger btn-sm"><i class="fa fa-check-square-o"></i> Fiche OF</a>
 
-              <a href="<?php echo $this->Html->url(['action' => 'editall']) ?>" class="btn btn-info btn-sm"><i class="fa fa-file-text-o"></i> Étiquettes </a>
+                <a href="<?php echo $this->Html->url(['action' => 'etiquettes', $this->data['Production']['id']]) ?>" class="btn btn-info btn-sm"><i class="fa fa-file-text-o"></i> Étiquettes </a>
 
                 <a href="<?php echo $this->Html->url(['action' => 'index']) ?>" class="btn btn-primary btn-sm"><i class="fa fa-reply"></i> Vers la liste </a>
                 <?php if ( $this->data['Production']['statut'] == -1 ): ?>
