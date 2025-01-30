@@ -2,15 +2,20 @@
 	<table class="table table-striped table-bordered  table-hover" cellpadding="0" cellspacing="0">
 		<thead>
 			<tr>
+Reference, Objet, Produit, Date création, Quantité à Produire, Date Production, Quantité Produite, Num Lot, DLC, Statut, Actions
+
+
 				<th nowrap="">Référence</th>
 				<th nowrap="">Objet</th>
-				<th nowrap="">Date</th>
-				<th nowrap="">Responsable</th>
+				<th nowrap="">Date OF</th>
 				<th nowrap="">Dépot</th>
 				<th nowrap="">Produit</th>
-				<th nowrap="">Quantité</th>
+				<th nowrap="">Date Prod</th>
+				<th nowrap="">Qtité à Prod</th>
+				<th nowrap="">Qtité Produite</th>
+				<th nowrap="">Num Lot</th>
+				<th nowrap="">D.L.C</th>
 				<th nowrap="">Statut</th>
-				<th nowrap="">Date création</th>
 				<th class="actions" nowrap=""></th>
 			</tr>
 		</thead>
@@ -19,11 +24,14 @@
 				<tr>
 					<td nowrap=""><a href="<?php echo $this->Html->url(['action' => 'view', $tache['Production']['id']]) ?>"><?php echo h($tache['Production']['reference']); ?></a></td>
 					<td nowrap=""><a href="<?php echo $this->Html->url(['action' => 'view', $tache['Production']['id']]) ?>"><?php echo h($tache['Production']['libelle']); ?></a></td>
-					<td nowrap=""><?php echo h($tache['Production']['date']); ?></td>
-					<td nowrap=""><?php echo h($tache['User']['nom']); ?> <?php echo h($tache['User']['prenom']); ?></td>
+					<td nowrap=""><?php echo h($tache['Production']['date_c']); ?></td>
 					<td nowrap=""><?php echo h($tache['Depot']['libelle']); ?></td>
 					<td nowrap=""><?php echo h($tache['Produit']['libelle']); ?></td>
+					<td nowrap=""><?php echo h($tache['Production']['date']); ?></td>
 					<td nowrap="" class="text-right"><?php echo h($tache['Production']['quantite']); ?></td>
+					<td nowrap="" class="text-right"><?php echo h($tache['Production']['quantite_prod']); ?></td>
+					<td nowrap=""><?php echo h($tache['Production']['numlot']); ?></td>
+					<td nowrap=""><?php echo h($tache['Production']['dlc']); ?></td>
 					<td nowrap="">
 						<?php if ( !empty( $tache['Production']['statut'] ) ): ?>
 							<span class="badge badge-default" style="width: 100%;background-color: <?php echo $this->App->getValideEntreeColor($tache['Production']['statut']); ?>">
@@ -31,7 +39,6 @@
 							</span>
 						<?php endif ?>
 					</td>
-					<td nowrap=""><?php echo h($tache['Production']['date_c']); ?></td>
 					<td nowrap="" class="actions">
 						<a href="<?php echo $this->Html->url(['action' => 'view', $tache['Production']['id']]) ?>"><i class="fa fa-eye"></i></a>
 						<?php if ($globalPermission['Permission']['m1'] AND $tache['Production']['statut'] == -1 ): ?>
