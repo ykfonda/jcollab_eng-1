@@ -2,9 +2,6 @@
 	<table class="table table-striped table-bordered  table-hover" cellpadding="0" cellspacing="0">
 		<thead>
 			<tr>
-Reference, Objet, Produit, Date création, Quantité à Produire, Date Production, Quantité Produite, Num Lot, DLC, Statut, Actions
-
-
 				<th nowrap="">Référence</th>
 				<th nowrap="">Objet</th>
 				<th nowrap="">Date OF</th>
