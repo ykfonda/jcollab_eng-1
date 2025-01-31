@@ -22,7 +22,13 @@
 					<td nowrap=""><?php echo h($mouvementprincipal['DepotDestination']['libelle']); ?></td>
 					<td><?php echo ($mouvementprincipal["Mouvementprincipal"]["nb_produits"]); ?> produit(s)</td>
 					<td nowrap=""><?php echo h($mouvementprincipal['Mouvementprincipal']['type']); ?></td>
-					<td nowrap=""><?php echo h($mouvementprincipal['Mouvementprincipal']['description']); ?></td>
+					
+					<td nowrap="">
+    <?php echo !empty($mouvementprincipal['Motifsretour']['libelle']) ? h($mouvementprincipal['Motifsretour']['libelle']) : '-'; ?>
+</td>
+
+
+
 					<td nowrap="">
 					<a class="btn btn-warning btn-xs" href="<?php echo $this->Html->url(['action' => 'view', $mouvementprincipal['Mouvementprincipal']['id']]) ?>"><i class="fa fa-eye"></i> Voir détail</a>
 					</td>

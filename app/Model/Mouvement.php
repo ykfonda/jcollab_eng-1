@@ -19,6 +19,10 @@ class Mouvement extends AppModel
 			'className' => 'User',
             'foreignKey' => 'user_c'
 		],
+		'Motifsretour' => [
+			'className' => 'Motifsretour',
+			'foreignKey' => 'description'
+		],
 	]; 
 	public function beforeSave($options = array()){
 		parent::beforeSave($options);

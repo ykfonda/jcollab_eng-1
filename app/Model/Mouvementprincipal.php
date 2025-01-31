@@ -28,6 +28,10 @@ class Mouvementprincipal extends AppModel
 			'className' => 'User',
             'foreignKey' => 'user_c'
 		],
+		'Motifsretour' => [
+			'className' => 'Motifsretour',
+			'foreignKey' => 'motifsretour_id'
+		],
 	]; 
 	
 	

@@ -751,11 +751,14 @@ class SortieController extends AppController {
 			'conditions'=>$conditions
 		]; */
 	
-		
-		$this->Paginator->settings = [
-		'order'=>['Mouvementprincipal.id' => 'DESC'],
-	    'contain'=>['DepotSource', 'DepotDestination'],
-		"conditions" => $conditions];
+	
+		$this->loadModel('Motifsretour');
+$this->Paginator->settings = [
+    'order' => ['Mouvementprincipal.id' => 'DESC'],
+    'contain' => ['DepotSource', 'DepotDestination', 'Motifsretour'], // Ajout de la relation
+    'conditions' => $conditions
+];
+
 		$mouvementprincipals = $this->Paginator->paginate('Mouvementprincipal');
 		
 		$this->set(compact('taches','mouvementprincipals'));
@@ -1046,6 +1049,7 @@ class SortieController extends AppController {
 			$insert = [
 				'id' => null,
 				'description' => ( isset( $this->data['Mouvement']['description'] ) ) ? $this->data['Mouvement']['description'] : 'Sortie en masse ' ,
+				'motifsretour_id' => ( isset( $this->data['Mouvement']['motifsretour_id'] ) ) ? $this->data['Mouvement']['motifsretour_id'] : null,
 				'date' => ( isset( $this->data['Mouvement']['date_sortie'] ) AND !empty( $this->data['Mouvement']['date_sortie'] ) ) ? date('Y-m-d', strtotime( $this->data['Mouvement']['date_sortie'] ) ) : date('Y-m-d') ,
 				'date_sortie' => ( isset( $this->data['Mouvement']['date_sortie'] ) AND !empty( $this->data['Mouvement']['date_sortie'] ) ) ? date('Y-m-d', strtotime( $this->data['Mouvement']['date_sortie'] ) ) : date('Y-m-d') ,
 				'depot_source_id' => ( isset( $this->data['Mouvement']['depot_id'] ) ) ? $this->data['Mouvement']['depot_id']: 0,
@@ -1092,9 +1096,17 @@ class SortieController extends AppController {
 				return $this->redirect( $this->referer() );
 			}
 		}
+
+		$this->loadModel('Motifsretour');
+		$motifs = $this->Mouvement->Motifsretour->find('list', [
+			'fields' => ['Motifsretour.id', 'Motifsretour.libelle']
+		]);
+		$this->set(compact('motifs'));
+
+		
 		$fournisseurs = $this->Mouvement->Fournisseur->find('list');
 		$depots = $this->Mouvement->DepotSource->findList(['DepotSource.id'=>$depots]);
-		$this->set(compact('depots','fournisseurs'));
+		$this->set(compact('depots','fournisseurs','motifs'));
 		$this->getPath($this->idModule);
 	}
 
