@@ -751,13 +751,12 @@ class SortieController extends AppController {
 			'conditions'=>$conditions
 		]; */
 	
-	
 		$this->loadModel('Motifsretour');
-$this->Paginator->settings = [
-    'order' => ['Mouvementprincipal.id' => 'DESC'],
-    'contain' => ['DepotSource', 'DepotDestination', 'Motifsretour'], // Ajout de la relation
-    'conditions' => $conditions
-];
+		$this->Paginator->settings = [
+			'order' => ['Mouvementprincipal.id' => 'DESC'],
+			'contain' => ['DepotSource', 'DepotDestination', 'Motifsretour'], // Ajout de la relation
+			'conditions' => $conditions
+		];
 
 		$mouvementprincipals = $this->Paginator->paginate('Mouvementprincipal');
 		
