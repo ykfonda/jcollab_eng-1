@@ -12,11 +12,37 @@
 	<div class="portlet-title">
 		<div class="caption">
 			Liste des sorties 
-		</div>
+	</div>
+
+  
+    <?php if (!$ftpConnected): ?>
+      <br />
+      <div class="alert alert-warning">
+      <i class="fa fa-exclamation-triangle"></i> 
+      La connexion FTP est indisponible. Ajout de nouvelles sorties désactivé.
+      </div>
+    <?php endif; ?>
+
+
+
+
+	
 		<div class="actions">
       <?php if ($globalPermission['Permission']['a']): ?>
         <a href="<?php echo $this->Html->url(['action' => 'editexp']) ?>" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Expédition </a>
-       <a href="<?php echo $this->Html->url(['action' => 'editall']) ?>" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Nouvelle sortie </a>
+
+
+<a href="<?php echo $this->Html->url(['action' => 'editall']) ?>" 
+class="btn btn-primary btn-sm <?php echo !$ftpConnected ? 'disabled' : ''; ?>" 
+<?php echo !$ftpConnected ? 'aria-disabled="true" onclick="return false;"' : ''; ?>>
+ <i class="fa fa-plus"></i> Nouvelle sortie
+</a>
+
+
+
+
+
+       
       <?php endif ?>
 		</div>
 	</div>
