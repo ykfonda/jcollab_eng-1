@@ -747,25 +747,28 @@ public function etiquettesGood($poids = null) {
     $this->set('poids', null);
 }
 
+
 public function etiquettes($production_id = null) {
     $this->loadModel('Balance');
     $this->loadModel('Etiquette');
 
     if ($this->request->is('ajax')) {
         require_once APP . 'Vendor' . DS . 'escpos-php' . DS . 'autoload.php';
-
         $poids = null;
+
+        // 🔹 Vérification du poids passé en POST
         if ($this->request->is('post') && isset($this->request->data['poids'])) {
             $poids = number_format(floatval($this->request->data['poids']), 3, '.', ''); // 🔹 FORCER 3 DÉCIMALES
         }
 
+        // 🔹 Si aucun poids, récupérer depuis la balance
         if ($poids === null) {
             $poidsData = json_decode($this->getPoidsBalance(), true);
             if (!isset($poidsData['poids']) || $poidsData['poids'] <= 0) {
                 echo json_encode(["error" => "Impossible de récupérer le poids depuis la balance."]);
                 exit;
             }
-            $poids = number_format($poidsData['poids'], 3, '.', ''); // 🔹 FORCER 3 DÉCIMALES
+            $poids = $poidsData['poids'];
         }
 
         if (!$production_id) {
@@ -781,8 +784,41 @@ public function etiquettes($production_id = null) {
             ]
         ]);
 
-        echo json_encode(["message" => "Étiquette enregistrée avec succès.", "poids" => $poids]);
-        exit;
+        // 🔹 Impression automatique
+        file_put_contents(APP . 'tmp/logs/impression.log', "Début impression avec poids : " . $poids . " kg\n", FILE_APPEND);
+        try {
+            // 🔹 Connexion à l'imprimante réseau
+            $connector = new NetworkPrintConnector("192.168.40.40", 9100);
+            $printer = new Printer($connector);
+
+            // 🔹 Impression des détails
+            $printer->setJustification(Printer::JUSTIFY_CENTER);
+            $printer->setEmphasis(true);
+            $printer->text("IMPRESSION DU POIDS\n");
+            $printer->setEmphasis(false);
+            $printer->text("----------------------------\n");
+
+            $printer->setJustification(Printer::JUSTIFY_LEFT);
+            $printer->text("Poids mesuré : " . number_format($poids, 3, ',', ' ') . " kg\n");
+            $printer->text("----------------------------\n");
+
+            $date = date("d/m/Y H:i:s");
+            $printer->text("Date : " . $date . "\n");
+
+            $printer->cut();
+            $printer->close();
+
+            // 🔹 Confirmation de l'impression
+            file_put_contents(APP . 'tmp/logs/impression.log', "Impression réussie avec poids : " . $poids . " kg\n", FILE_APPEND);
+            
+            echo json_encode(["message" => "Étiquette enregistrée et imprimée avec succès.", "poids" => $poids]);
+            exit;
+        } catch (Exception $e) {
+            // 🔹 Gestion des erreurs d'impression
+            file_put_contents(APP . 'tmp/logs/impression.log', "Erreur d'impression : " . $e->getMessage() . "\n", FILE_APPEND);
+            echo json_encode(["error" => "Erreur d'impression : " . $e->getMessage()]);
+            exit;
+        }
     }
 
     // 🔹 Récupération des balances enregistrées
@@ -796,6 +832,7 @@ public function etiquettes($production_id = null) {
 
     $this->set(compact('production_id', 'balances'));
 }
+
 
 
 
@@ -882,6 +919,46 @@ public function checkBalanceAvailability($balance_id = null) {
 
         echo json_encode(["statut" => "indisponible"]);
     }
+    exit;
+}
+
+
+public function deletePoids() {
+    $this->autoRender = false;
+    $this->loadModel('Etiquette');
+
+    if ($this->request->is('post')) {
+        // Vérifier si le poids est bien reçu
+        $poids = isset($this->request->data['poids']) ? $this->request->data['poids'] : null;
+
+        if (!$poids) {
+            echo json_encode(["error" => "Poids invalide."]);
+            exit;
+        }
+
+        // Vérifier si le poids existe dans la base
+        $etiquette = $this->Etiquette->find('first', ['conditions' => ['Etiquette.poids' => $poids]]);
+        if (!$etiquette) {
+            echo json_encode(["error" => "Poids non trouvé dans la base."]);
+            exit;
+        }
+
+        // 🔹 Ajout de logs pour voir si on arrive ici
+        file_put_contents(APP . 'tmp/logs/delete.log', "Tentative de suppression du poids : " . $poids . "\n", FILE_APPEND);
+
+        // Mettre à jour `deleted = 1` au lieu de supprimer définitivement
+        if ($this->Etiquette->updateAll(
+            ['Etiquette.deleted' => 1],
+            ['Etiquette.poids' => $poids]
+        )) {
+            echo json_encode(["message" => "Poids supprimé avec succès."]);
+        } else {
+            echo json_encode(["error" => "Échec de la suppression."]);
+        }
+        exit;
+    }
+
+    echo json_encode(["error" => "Requête invalide."]);
     exit;
 }
 

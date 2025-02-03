@@ -37,6 +37,7 @@
             <tr>
                 <th>#</th>
                 <th>Poids (kg)</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody id="poidsList">
@@ -104,8 +105,8 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
-        document.getElementById("stopScan").style.display = "block"; // Afficher le bouton d'arrêt
-        document.getElementById("startScan").style.display = "none"; // Masquer le bouton de démarrage
+        document.getElementById("stopScan").style.display = "block";
+        document.getElementById("startScan").style.display = "none";
 
         if (intervalId) {
             clearInterval(intervalId);
@@ -119,17 +120,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         lastPoids = data.poids;
                         let poidsFormate = parseFloat(data.poids).toFixed(3);
 
-                        let poidsList = document.getElementById("poidsList");
-                        let newRow = document.createElement("tr");
-
-                        newRow.innerHTML = `
-                            <td>${compteur}</td>
-                            <td><input type="text" class="form-control" value="${poidsFormate}" readonly></td>
-                        `;
-
-                        poidsList.prepend(newRow);
-                        compteur++;
-
+                        ajouterLignePoids(poidsFormate);
                         enregistrerEtImprimer(productionId, poidsFormate);
                     }
                 })
@@ -143,11 +134,11 @@ document.addEventListener("DOMContentLoaded", function() {
             intervalId = null;
         }
 
-        document.getElementById("stopScan").style.display = "none"; // Masquer le bouton d'arrêt
-        document.getElementById("startScan").style.display = "block"; // Réafficher le bouton de démarrage
+        document.getElementById("stopScan").style.display = "none";
+        document.getElementById("startScan").style.display = "block";
     });
 
-    function enregistrerEtImprimer(productionId, poids) {
+    window.enregistrerEtImprimer = function(productionId, poids) {
         fetch(`/jcollab/jcollab_eng/productions/etiquettes/${productionId}`, {
             method: "POST",
             headers: {
@@ -166,6 +157,48 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         })
         .catch(error => console.error("Erreur AJAX :", error));
+    }
+
+    window.supprimerPoids = function(element, poids) {
+        console.log("📡 Suppression du poids :", poids);
+
+        fetch("/jcollab/jcollab_eng/productions/deletePoids", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: "poids=" + encodeURIComponent(poids)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error("⛔ Erreur :", data.error);
+            }
+            if (data.message) {
+                console.log("✔ Poids supprimé avec succès.");
+                let row = element.closest("tr");
+                row.remove();
+            }
+        })
+        .catch(error => console.error("Erreur AJAX :", error));
+    }
+
+    function ajouterLignePoids(poids) {
+        let poidsList = document.getElementById("poidsList");
+        let newRow = document.createElement("tr");
+
+        newRow.innerHTML = `
+            <td>${compteur}</td>
+            <td><input type="text" class="form-control" value="${poids}" readonly></td>
+            <td>
+                <button class="btn btn-info btn-sm" onclick="enregistrerEtImprimer('${productionId}', '${poids}')">🖨 Imprimer</button>
+                <button class="btn btn-danger btn-sm" onclick="supprimerPoids(this, '${poids}')">🗑 Supprimer</button>
+            </td>
+        `;
+
+        poidsList.prepend(newRow);
+        compteur++;
     }
 });
 </script>
