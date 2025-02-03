@@ -10,7 +10,9 @@
     <select id="selectBalance" class="form-control">
         <option value="">-- Sélectionner une balance --</option>
         <?php foreach ($balances as $balance): ?>
-            <option value="<?= h($balance['Balance']['id']); ?>" data-ip="<?= h($balance['Balance']['adresse_ip']); ?>" data-port="<?= h($balance['Balance']['port']); ?>">
+            <option value="<?= h($balance['Balance']['id']); ?>" 
+                    data-ip="<?= h($balance['Balance']['adresse_ip']); ?>" 
+                    data-port="<?= h($balance['Balance']['port']); ?>">
                 <?= h($balance['Balance']['libelle']); ?>
             </option>
         <?php endforeach; ?>
@@ -22,9 +24,10 @@
     <span id="balanceStatus" class="badge bg-secondary">Aucune balance sélectionnée</span>
 </div>
 
-<!-- Bouton pour démarrer le scan (masqué par défaut) -->
+<!-- Boutons de contrôle du scan -->
 <div class="container mt-3">
     <button id="startScan" class="btn btn-primary" style="display: none;">Démarrer le Scan</button>
+    <button id="stopScan" class="btn btn-danger" style="display: none;">Arrêter le Scan</button>
 </div>
 
 <!-- Formulaire pour stocker les poids -->
@@ -58,6 +61,7 @@ document.addEventListener("DOMContentLoaded", function() {
             document.getElementById("balanceStatus").textContent = "Aucune balance sélectionnée";
             document.getElementById("balanceStatus").className = "badge bg-secondary";
             document.getElementById("startScan").style.display = "none";
+            document.getElementById("stopScan").style.display = "none";
             return;
         }
 
@@ -100,6 +104,9 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
+        document.getElementById("stopScan").style.display = "block"; // Afficher le bouton d'arrêt
+        document.getElementById("startScan").style.display = "none"; // Masquer le bouton de démarrage
+
         if (intervalId) {
             clearInterval(intervalId);
         }
@@ -128,6 +135,16 @@ document.addEventListener("DOMContentLoaded", function() {
                 })
                 .catch(error => console.error("Erreur AJAX :", error));
         }, 3000);
+    });
+
+    document.getElementById("stopScan").addEventListener("click", function() {
+        if (intervalId) {
+            clearInterval(intervalId);
+            intervalId = null;
+        }
+
+        document.getElementById("stopScan").style.display = "none"; // Masquer le bouton d'arrêt
+        document.getElementById("startScan").style.display = "block"; // Réafficher le bouton de démarrage
     });
 
     function enregistrerEtImprimer(productionId, poids) {
