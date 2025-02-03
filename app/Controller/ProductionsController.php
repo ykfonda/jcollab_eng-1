@@ -747,8 +747,10 @@ public function etiquettesGood($poids = null) {
     $this->set('poids', null);
 }
 
-
 public function etiquettes($production_id = null) {
+    $this->loadModel('Balance');
+    $this->loadModel('Etiquette');
+
     if ($this->request->is('ajax')) {
         require_once APP . 'Vendor' . DS . 'escpos-php' . DS . 'autoload.php';
 
@@ -772,7 +774,6 @@ public function etiquettes($production_id = null) {
         }
 
         // 🔹 Sauvegarde en base de données avec format 3 décimales
-        $this->loadModel('Etiquette');
         $this->Etiquette->save([
             'Etiquette' => [
                 'production_id' => $production_id,
@@ -784,8 +785,19 @@ public function etiquettes($production_id = null) {
         exit;
     }
 
-    $this->set('production_id', $production_id);
+    // 🔹 Récupération des balances enregistrées
+    $balances = $this->Balance->find('all', [
+        'recursive' => -1
+    ]);
+
+    if (empty($balances)) {
+        $this->Session->setFlash("⚠ Aucune balance trouvée en base de données.", 'default', ['class' => 'alert alert-warning']);
+    }
+
+    $this->set(compact('production_id', 'balances'));
 }
+
+
 
 
 
@@ -837,6 +849,42 @@ public function getPoidsBalance() {
     echo json_encode(["poids" => $poids]);
     exit;
 }
+
+
+public function checkBalanceAvailability($balance_id = null) {
+    $this->autoRender = false;
+    $this->loadModel('Balance');
+
+    if (!$balance_id) {
+        echo json_encode(["error" => "Aucune balance sélectionnée."]);
+        exit;
+    }
+
+    $balance = $this->Balance->findById($balance_id);
+    if (!$balance) {
+        echo json_encode(["error" => "Balance introuvable."]);
+        exit;
+    }
+
+    $adresse_ip = $balance['Balance']['adresse_ip'];
+    $port = $balance['Balance']['port'];
+
+    $connection = @fsockopen($adresse_ip, $port, $errno, $errstr, 2);
+    if ($connection) {
+        fclose($connection);
+        $this->Balance->id = $balance_id;
+        $this->Balance->saveField('statut', 'disponible');
+
+        echo json_encode(["statut" => "disponible"]);
+    } else {
+        $this->Balance->id = $balance_id;
+        $this->Balance->saveField('statut', 'indisponible');
+
+        echo json_encode(["statut" => "indisponible"]);
+    }
+    exit;
+}
+
 
 
 
