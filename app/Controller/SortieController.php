@@ -1735,6 +1735,7 @@ class SortieController extends AppController {
 			$insert = [
 				'id' => null,
 				'description' => ( isset( $this->data['Mouvement']['description'] ) ) ? $this->data['Mouvement']['description'] : 'Sortie en masse ' ,
+				'motifsretour_id' => ( isset( $this->data['Mouvement']['motifsretour_id'] ) ) ? $this->data['Mouvement']['motifsretour_id'] : null,
 				'date' => ( isset( $this->data['Mouvement']['date'] ) ) ? date('Y-m-d', strtotime( $this->data['Mouvement']['date'] ) ) : date('Y-m-d') ,
 				'date_sortie' => ( isset( $this->data['Mouvement']['date_sortie'] ) AND !empty( $this->data['Mouvement']['date_sortie'] ) ) ? date('Y-m-d', strtotime( $this->data['Mouvement']['date_sortie'] ) ) : date('Y-m-d') ,
 				'depot_source_id' => ( isset( $this->data['Mouvement']['depot_id'] ) ) ? $this->data['Mouvement']['depot_id']: 0,
@@ -1797,7 +1798,7 @@ class SortieController extends AppController {
 		]);
 		$this->set(compact('motifs'));
 
-		
+
 		$fournisseurs = $this->Mouvement->Fournisseur->find('list');
 		$selected_store  = $this->Session->read('Auth.User.StoreSession.id');
 		$this->loadModel("Depot");

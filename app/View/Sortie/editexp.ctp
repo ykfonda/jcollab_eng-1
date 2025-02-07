@@ -21,7 +21,6 @@
 }
 </style>
 
-
 <div class="hr"></div>
 <div class="portlet light bordered">
 	<div class="portlet-title">
