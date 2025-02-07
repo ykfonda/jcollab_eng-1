@@ -39,7 +39,7 @@
 	<div class="portlet light bordered">
   <div class="portlet-title">
     <div class="caption">
-      Informations Sortie
+      Informations sortie
     </div>
     <div class="actions">
     </div>
@@ -76,7 +76,7 @@
 			  <tr>
                 <td class="tableHead" nowrap="">Motif</td>
                 <td nowrap="">
-                  <?php echo $this->data['Mouvementprincipal']['description'] ?>
+				<?php echo isset($this->data['Motifsretour']['libelle']) ? h($this->data['Motifsretour']['libelle']) : 'Non spécifié'; ?>
                 </td>
               </tr>
 

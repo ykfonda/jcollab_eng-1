@@ -1005,17 +1005,28 @@ class SortieController extends AppController {
 
 		die( json_encode( $depots ) );
 	}
+
+
+	
 	public function view($sortie_id = null) {
 		$details = [];
-
+	
+		// Chargement des modèles nécessaires
 		$this->loadModel('Mouvementprincipal');
 		$this->loadModel('Sortiedetail');
 		$this->loadModel('Bonreception');
+		$this->loadModel('Motifsretour'); // Correction du nom du modèle
 	
 		if ($this->Mouvementprincipal->exists($sortie_id)) {
-			$options = array('contain' => "DepotSource",'conditions' => array('Mouvementprincipal.' . $this->Mouvementprincipal->primaryKey => $sortie_id));
+			$options = array(
+				'contain' => array(
+					'DepotSource',
+					'Motifsretour' // Correction du nom du modèle dans contain
+				),
+				'conditions' => array('Mouvementprincipal.' . $this->Mouvementprincipal->primaryKey => $sortie_id)
+			);
 			$this->request->data = $this->Mouvementprincipal->find('first', $options);
-			
+	
 			$details = $this->Sortiedetail->find('all', array(
 				'conditions' => array('Sortiedetail.id_mouvementprincipal' => $sortie_id),
 				'order' => array('Sortiedetail.id' => 'DESC'),
@@ -1023,23 +1034,31 @@ class SortieController extends AppController {
 					'Mouvementprincipal' => array(
 						'Bonreception' => array(
 							'conditions' => array('Bonreception.mouvementprincipal_id' => $sortie_id),
-							'Bonreceptiondetail' 
-						)
+							'Bonreceptiondetail'
+						),
+						'Motifsretour' // Correction du nom du modèle ici aussi
 					),
 					'Produit',
 					'DepotSource',
 					'DepotDestination'
 				)
 			));
-						
 		}
-
-		$depots = $this->Mouvementprincipal->DepotSource->findList();
-		$produits = $this->Mouvementprincipal->Produit->findList();
-		$this->set(compact('produits','depots','details'));
+	
+		// Récupération des listes nécessaires pour les sélections
+		$depots = $this->Mouvementprincipal->DepotSource->find('list');
+		$produits = $this->Mouvementprincipal->Produit->find('list');
+		
+		// Récupération de la liste des motifs
+		$motifs = $this->Motifsretour->find('list', array(
+			'fields' => array('id', 'libelle')
+		));
+	
+		// Passer les données à la vue
+		$this->set(compact('produits', 'depots', 'details', 'motifs'));
 		$this->getPath($this->idModule);
 	}
-
+	
 
 	public function editall() {
 		$depots = $this->Session->read('depots');
