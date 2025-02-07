@@ -60,9 +60,20 @@
 				</div>
 
 				<div class="form-group row">
+
 					<label class="control-label col-md-2">Motif</label>
 					<div class="col-md-4">
-					<?php echo $this->Form->input('description', ['class' => 'form-control', 'label' => false, 'required' => true]); ?>
+
+					<?php echo $this->Form->input('motifsretour_id', [
+						'type' => 'select',
+						'class' => 'form-control select2',
+						'label' => false,
+						'required' => false,
+						'options' => $motifs, // Liste des motifs récupérée depuis le contrôleur
+						'empty' => 'Sélectionnez un motif'
+					]); ?>
+
+
 					</div>
 
 

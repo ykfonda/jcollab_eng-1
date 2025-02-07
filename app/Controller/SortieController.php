@@ -1790,6 +1790,14 @@ class SortieController extends AppController {
 				return $this->redirect( $this->referer() );
 			}
 		}
+
+		$this->loadModel('Motifsretour');
+		$motifs = $this->Mouvement->Motifsretour->find('list', [
+			'fields' => ['Motifsretour.id', 'Motifsretour.libelle']
+		]);
+		$this->set(compact('motifs'));
+
+		
 		$fournisseurs = $this->Mouvement->Fournisseur->find('list');
 		$selected_store  = $this->Session->read('Auth.User.StoreSession.id');
 		$this->loadModel("Depot");
