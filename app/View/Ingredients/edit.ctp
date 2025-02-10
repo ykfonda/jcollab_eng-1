@@ -2,6 +2,13 @@
 .select2-selection {
 	height : 3.2em;
 }
+
+.mt-4.alert.alert-light {
+	width: 30%;
+	margin-left: auto;
+	margin-right: auto;
+}
+
 </style>
 
 <div id="id1">
@@ -212,6 +219,11 @@
     </div>
 </div>
 
+<!-- Champ caché pour stocker les prix en JSON -->
+<input type="hidden" name="data[Produit][type_conditionnement_prix]" id="hiddenTypeConditionnementPrix">
+
+
+
 <!-- Ce conteneur affichera les champs prix -->
 <div id="selectedItems" class="mt-4 alert alert-light"></div>
 
@@ -220,10 +232,8 @@
 
 <script>
 $(document).ready(function() {
-    // Initialisation de select2
     $('#ProduitTypeConditionnement').select2();
 
-    // Gestion de l'événement de changement dans le select
     $('#ProduitTypeConditionnement').on('select2:select select2:unselect', function () {
         updateSelectedItems();
     });
@@ -232,30 +242,46 @@ $(document).ready(function() {
         let selectElement = document.getElementById("ProduitTypeConditionnement");
         let selectedItemsContainer = document.getElementById("selectedItems");
 
-        // Vider l'affichage des champs prix avant de rajouter les nouveaux
         selectedItemsContainer.innerHTML = "";
 
-        // Vérifier s'il y a des options sélectionnées
         if (selectElement.selectedOptions.length === 0) {
-			selectedItemsContainer.innerHTML = "<div class='alert alert-warning mt-2'>Aucun type de conditionnement sélectionné</div>";
+            selectedItemsContainer.innerHTML = "<div class='alert alert-warning mt-2'>Aucun type de conditionnement sélectionné</div>";
             return;
         }
 
-        // Boucler sur les options sélectionnées et ajouter les champs prix
         Array.from(selectElement.selectedOptions).forEach(option => {
+            const existingInput = document.querySelector(`input[data-key="${option.value}"]`);
+            const priceValue = existingInput ? existingInput.value : '';
+
             const selectedDiv = document.createElement("div");
             selectedDiv.classList.add("selected-item", "form-group", "row");
 
             selectedDiv.innerHTML = `
                 <label class="col-md-3 control-label">${option.text}</label>
                 <div class="col-md-4">
-                    <input type="number" class="form-control" name="prix_conditionnement[${option.value}]" placeholder="Prix" required min="0" step="any">
+                    <input type="number" class="form-control type-price" name="prix_conditionnement[${option.value}]" data-key="${option.value}" value="${priceValue}" placeholder="Prix" required min="0" step="any">
                 </div>
             `;
 
             selectedItemsContainer.appendChild(selectedDiv);
         });
     }
+
+    // Avant d'envoyer le formulaire, on formate les données sous JSON
+    $('#ProduitEditForm').on('submit', function() {
+        let prixData = {};
+        $(".type-price").each(function() {
+            let key = $(this).data('key');
+            let price = $(this).val();
+            if (price) {
+                prixData[key] = price;
+            }
+        });
+
+        // Convertir en JSON et l'ajouter à un champ caché
+        let jsonPrix = JSON.stringify(prixData);
+        $("#hiddenTypeConditionnementPrix").val(jsonPrix);
+    });
 
     // Charger les valeurs déjà sélectionnées au démarrage
     updateSelectedItems();

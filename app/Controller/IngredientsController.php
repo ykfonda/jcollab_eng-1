@@ -310,10 +310,21 @@ class IngredientsController extends AppController
 
 
 
-    if (isset($this->request->data['Produit']['type_conditionnement']) && is_array($this->request->data['Produit']['type_conditionnement'])) {
-        $this->request->data['Produit']['type_conditionnement'] = json_encode($this->request->data['Produit']['type_conditionnement']);
-    }
-
+            if (isset($this->request->data['Produit']['type_conditionnement']) && is_array($this->request->data['Produit']['type_conditionnement'])) {
+    
+                // Vérifier si les prix sont envoyés et les décoder
+                if (!empty($this->request->data['Produit']['type_conditionnement_prix'])) {
+                    $prixArray = json_decode($this->request->data['Produit']['type_conditionnement_prix'], true);
+                } else {
+                    $prixArray = [];
+                }
+            
+                // Création d'un format structuré combinant types et prix
+                $this->request->data['Produit']['type_conditionnement'] = json_encode([
+                    "variation" => $this->request->data['Produit']['type_conditionnement'], // Liste des types
+                    "prix"  => $prixArray // Liste des prix associés
+                ]);
+            }     
 
             ///call api
             if ($id != null) {
@@ -365,7 +376,10 @@ class IngredientsController extends AppController
                 }
             }
 
-           // die(var_dump($this->request->data));
+
+
+            // debug($this->request->data);
+            // die();
 
             if ($this->Produit->save($this->request->data)) {
                 if ($id == null) {
@@ -912,6 +926,7 @@ class IngredientsController extends AppController
                 $produits = $this->Produit->find('all', [
                     'conditions' => [
                         'Produit.deleted' => 0,
+                      //  'Produit.id' => 634,
                     ]
                 ]);
             
