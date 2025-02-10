@@ -21,34 +21,30 @@
 		<div class="col-md-12">
 		<div class="form-group row">
 
-			<div class="col-md-4">
-				<label class="control-label">Référence</label>
 				<?php echo $this->Form->input('reference', [
 				'class' => 'form-control', 
-				'label' => false, 
+				'label' => false,
+				'type' => 'hidden', 
 				'readonly' => true
 				]); ?>
-			</div>
 
-			<div class="col-md-4">
-				<label class="control-label">EAN13</label>
-				<?php echo $this->Form->input('ean13', [
-				'class' => 'form-control', 
-				'label' => false, 
-				'readonly' => false // Modifié pour rendre éditable
-				]); ?>
-			</div>
+				<div class="col-md-4">
+					<label class="control-label">EAN13</label>
+					<?php echo $this->Form->input('ean13', [
+					'class' => 'form-control', 
+					'label' => false, 
+					'readonly' => false // Modifié pour rendre éditable
+					]); ?>
+				</div>
 
-			<div class="col-md-4">
-				<label class="control-label">Date création</label>
 				<?php echo $this->Form->input('date', [
 				'class' => 'form-control', 
 				'label' => false, 
 				'readonly' => true, 
-				'type' => 'text', 
+				'type' => 'hidden', 
 				'default' => date('d-m-Y')
 				]); ?>
-			</div>
+
 			</div>
 
 
@@ -204,17 +200,69 @@
           </div>
 		</div>
 
-        <div class="form-group row">
-          <label class="control-label col-md-2">Type Conditionnement</label>
-          <div class="col-md-8">
-             <select name="data[Produit][type_conditionnement][]" class="select2 form-control" multiple="multiple" id="ProduitTypeConditionnement">
-             <?php foreach ($condtionnements as $key => $value) { ?>
+		<div class="form-group row">
+    <label class="control-label col-md-2">Type Conditionnement</label>
+    <div class="col-md-8">
+        <select name="data[Produit][type_conditionnement][]" class="select2 form-control" multiple="multiple" id="ProduitTypeConditionnement">
+            <?php foreach ($condtionnements as $key => $value) { ?>
                 <option value="<?php echo $key; ?>" <?php if (in_array($value, $typeconditionnementslibelles)) { ?>
                 selected <?php } ?>><?php echo $value; ?></option>   
-              <?php } ?>
-            </select>
-          </div>
-        </div>
+            <?php } ?>
+        </select>
+    </div>
+</div>
+
+<!-- Ce conteneur affichera les champs prix -->
+<div id="selectedItems" class="mt-4 alert alert-light"></div>
+
+
+
+
+<script>
+$(document).ready(function() {
+    // Initialisation de select2
+    $('#ProduitTypeConditionnement').select2();
+
+    // Gestion de l'événement de changement dans le select
+    $('#ProduitTypeConditionnement').on('select2:select select2:unselect', function () {
+        updateSelectedItems();
+    });
+
+    function updateSelectedItems() {
+        let selectElement = document.getElementById("ProduitTypeConditionnement");
+        let selectedItemsContainer = document.getElementById("selectedItems");
+
+        // Vider l'affichage des champs prix avant de rajouter les nouveaux
+        selectedItemsContainer.innerHTML = "";
+
+        // Vérifier s'il y a des options sélectionnées
+        if (selectElement.selectedOptions.length === 0) {
+			selectedItemsContainer.innerHTML = "<div class='alert alert-warning mt-2'>Aucun type de conditionnement sélectionné</div>";
+            return;
+        }
+
+        // Boucler sur les options sélectionnées et ajouter les champs prix
+        Array.from(selectElement.selectedOptions).forEach(option => {
+            const selectedDiv = document.createElement("div");
+            selectedDiv.classList.add("selected-item", "form-group", "row");
+
+            selectedDiv.innerHTML = `
+                <label class="col-md-3 control-label">${option.text}</label>
+                <div class="col-md-4">
+                    <input type="number" class="form-control" name="prix_conditionnement[${option.value}]" placeholder="Prix" required min="0" step="any">
+                </div>
+            `;
+
+            selectedItemsContainer.appendChild(selectedDiv);
+        });
+    }
+
+    // Charger les valeurs déjà sélectionnées au démarrage
+    updateSelectedItems();
+});
+</script>
+
+
 		
 			<div class="form-group row">
 				<label class="control-label col-md-2">Option</label>
