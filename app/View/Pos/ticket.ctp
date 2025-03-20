@@ -88,14 +88,23 @@ body, .DivIdToPrint {
                 
                 <div>
             
-                CLIENT : 
+                CLIENT :  
                     <?php 
                         if ($societe['Societe']['id'] == 2) {
-                            // Récupérer le client via la fonction GetClient
-                            $client = $this->GetClient(2); // ID du client spécifique pour la société 2
-                            echo $client['Client']['designation']; 
-                            echo $client['Client']['adresse']; 
-                        } else {
+                            $client = $this->requestAction(['controller' => 'pos', 'action' => 'GetClient', 2]);
+
+                            if (!empty($client)) {
+
+                                echo $client['Client']['designation'];
+
+                                if (!empty($client['Client']['adresse'])) {
+                                    echo $client['Client']['adresse'];
+                                }
+
+                            }
+                        }
+
+                         else {
                             // Si ce n'est pas la société 2, utiliser les données déjà présentes dans $this->data['Client']
                             echo $this->data['Client']['designation']; 
                             echo $this->data['Client']['adresse']; 
