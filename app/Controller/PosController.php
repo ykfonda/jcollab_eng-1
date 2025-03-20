@@ -708,10 +708,18 @@ class PosController extends AppController
 
     public function generatecommandes()
     {
+        if (!function_exists('curl_init')) {
+            die('cURL is not enabled. Please enable cURL in your PHP configuration.');
+        }
+
         $ch = curl_init();
         $parametres = $this->GetParametreSte();
 
         $url = $parametres['Api pending'];
+
+        var_dump($parametres);
+        die();
+        
         $headers = [
             'Content-Type:application/json',
         ];
@@ -2508,13 +2516,15 @@ class PosController extends AppController
         $response['message'] = '';
         $longeur = strlen($code_barre);
 
- 
 
         if ($longeur != 13) {
             $response['message'] = 'Code a barre est incorrect , produit introuvable !';
         } else {
 
 
+
+
+            
             $params = $this->Parametreste->findList();
             $cb_identifiant = (isset($params['cb_identifiant']) and !empty($params['cb_identifiant'])) ? $params['cb_identifiant'] : '2900';
             $cb_produit_depart = (isset($params['cb_produit_depart']) and !empty($params['cb_produit_depart'])) ? $params['cb_produit_depart'] : 4;
@@ -2534,12 +2544,6 @@ class PosController extends AppController
                     $code_article = $produit['Produit']['code_barre'];
                 $quantite = 1;
                 }
-                
-
-               
-
-              
-
             //} 
             
             // else {
@@ -4035,6 +4039,118 @@ class PosController extends AppController
         $this->layout = false;
     }
 
+
+    public function saveOrdersFromApi() {
+
+        $this->loadModel('Ecommerce');
+        $this->loadModel('Ecommercedetail');
+
+        // Désactiver le rendu automatique de la vue
+        $this->autoRender = false;
+        
+        // Récupérer les paramètres API
+        $parametres = $this->GetParametreSte();
+        $url = $parametres['Api pending'];
+        $user = $parametres['User'];
+        $password = $parametres['Password'];
+    
+        // Récupérer le site avant d'appeler la fonction
+        $store_id = $this->Session->read('Auth.User.StoreSession.id');
+        $storeSession = $this->Store->find('first', [
+            'conditions' => ['Store.id' => $store_id], 
+            'contain' => ['Societe']
+        ]);
+        $site = $storeSession['Store']['id_ecommerce']; // Assurez-vous que le champ id_ecommerce existe
+
+        // Effectuer la requête vers l'API pour récupérer les données
+        $response = $this->callApi();
+
+
+        // Vérifier si la réponse est valide
+        if ($response && $response['success'] && isset($response['data'])) {
+            foreach ($response['data'] as $orderData) {
+                foreach ($orderData as $order) {
+                    // Sauvegarder la commande principale
+                    $orderEntity = $this->Order->create([
+                        'barcode' => $order['id'],
+                        'online_id' => $order['id'],
+                        'fee' => $order['fee'],
+                        'shipment' => $order['shipment'],
+                        'payment_method' => $order['payment_method'],
+                        'adresse' => $order['customer']['address'],
+                        'date' => date('Y-m-d', strtotime($order['date_created'])),
+                        'store_id' => $this->Session->read('Auth.User.StoreSession.id'),
+                    ]);
+                    if ($this->Order->save($orderEntity)) {
+                        // Sauvegarder les détails de la commande (produits)
+                        foreach ($order['line_items'] as $lineItem) {
+                            $lineItemEntity = $this->OrderDetail->create([
+                                'unit_price' => $lineItem['unit_price'],
+                                'prix_vente' => $lineItem['unit_price'],
+                                'produit_id' => $lineItem['product_id'], // Assurez-vous que ce produit existe dans votre base
+                                'online_id' => $lineItem['id'],
+                                'qte_cmd' => $lineItem['quantity'],
+                                'qte_ordered' => $lineItem['quantity'],
+                                'total' => 0, // Vous pouvez calculer ici le total si nécessaire
+                                'ttc' => 0,   // Vous pouvez calculer ici le TTC si nécessaire
+                                'qte' => $lineItem['quantity'],
+                                'order_id' => $this->Order->id, // Lier le détail à la commande
+                            ]);
+                            $this->OrderDetail->save($lineItemEntity);
+                        }
+                    }
+                }
+            }
+        } else {
+            $this->Session->setFlash('Erreur lors de la récupération des données de l\'API');
+        }
+    }
+    
+    // Fonction pour appeler l'API
+    public function callApi() {
+        $this->autoRender = false;
+    
+        $ch = curl_init();
+        $url = "https://lafonda-uat.o2usd.net/rest/api/orders/pending";
+        
+        $data = json_encode(['site' => 1]);
+    
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_ENCODING, '');
+        curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 0);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Authorization: Basic ' . base64_encode('restapi:DSDS@$%^&@#')
+        ]);
+    
+        $response = curl_exec($ch);
+    
+        if (curl_errno($ch)) {
+            return ['success' => false, 'error' => curl_error($ch)];
+        }
+    
+        curl_close($ch);
+    
+        return json_decode($response, true);
+    }
+
+
+    public function GetClient($client_id = 2) {
+        $this->loadModel('Client');
+
+        return $this->Client->find('first', [
+            'conditions' => ['Client.id' => $client_id]
+        ]);
+    }
+    
+    
+    
 
     
 }
