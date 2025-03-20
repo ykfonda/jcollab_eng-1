@@ -471,6 +471,15 @@ class AppController extends Controller
         return $this->Societe->find('first', ['contain' => ['Pdfmodele'], 'conditions' => ['Societe.id' => $societe_id]]);
     }
 
+    protected function GetClient($client_id = 2)
+    {
+        $this->loadModel('Client');
+    
+        return $this->Client->find('first', [
+            'conditions' => ['Client.id' => $client_id]
+        ]);
+    }
+
     protected function GetAdmins()
     {
         $list = [];

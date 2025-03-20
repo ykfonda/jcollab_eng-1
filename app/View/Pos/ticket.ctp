@@ -87,10 +87,22 @@ body, .DivIdToPrint {
                 </div>
                 
                 <div>
-                    CLIENT : <?php echo $this->data['Client']['designation']; ?><br/>
-                    <?php if (isset($this->data['Client']['adresse']) and !empty($this->data['Client']['adresse'])): ?>
-                    <?php echo $this->data['Client']['adresse']; ?><br/>    
-                    <?php endif; ?>
+            
+                CLIENT : 
+                    <?php 
+                        if ($societe['Societe']['id'] == 2) {
+                            // Récupérer le client via la fonction GetClient
+                            $client = $this->GetClient(2); // ID du client spécifique pour la société 2
+                            echo $client['Client']['designation']; 
+                            echo $client['Client']['adresse']; 
+                        } else {
+                            // Si ce n'est pas la société 2, utiliser les données déjà présentes dans $this->data['Client']
+                            echo $this->data['Client']['designation']; 
+                            echo $this->data['Client']['adresse']; 
+                        }
+                    ?>
+
+                    <br/>
                      <?php if (isset($this->data['Client']['telmobile']) and !empty($this->data['Client']['telmobile'])): ?>
                     TEL : <?php echo $this->data['Client']['telmobile']; ?>
                     <?php endif; ?>
