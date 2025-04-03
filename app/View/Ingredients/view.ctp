@@ -193,25 +193,41 @@
           </div>
         </div>
         <div class="form-group row">
-          <label class="control-label col-md-2">Type Conditionnemento</label>
+          <label class="control-label col-md-2">Type Conditionnement</label>
           <div class="col-md-8">
+          <table class="table table-bordered table-striped table-hover">
+    <thead class="thead-dark">
+        <tr>
+            <th>Conditionnement</th>
+            <th>Prix</th>
+            <th>EAN13 - BALANCE</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+        // Décoder la chaîne JSON contenant les EAN13
+        $ean13_data = [];
 
-        <table class="table table-bordered table-striped table-hover">
-            <thead class="thead-dark">
-                <tr>
-                    <th>Conditionnement</th>
-                    <th>Prix</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($prix_conditionnement as $prix => $conditionnement): ?>
-                    <tr>
-                        <td><?php echo h($conditionnement); ?></td>
-                        <td><?php echo h($prix . " DH"); ?></td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+        if (preg_match_all('/Conditionnement:\s*(\d+),\s*EAN13:\s*(\d+)/', $ean13_variante_display, $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $match) {
+                $ean13_data[$match[1]] = $match[2]; // $match[1] = Conditionnement, $match[2] = EAN13
+            }
+        }
+
+        foreach ($prix_conditionnement as $conditionnement => $prix): ?>
+            <tr>
+                <td><?php echo h($conditionnement); ?></td>
+                <td><?php echo h($prix . " DH"); ?></td>
+                <td>
+                    <?php
+                    // Vérifier si un EAN13 existe pour ce conditionnement
+                    echo isset($ean13_data[$conditionnement]) ? h($ean13_data[$conditionnement]) : 'N/A';
+                    ?>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
 
           </div>
         </div>

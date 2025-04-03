@@ -808,6 +808,20 @@ class IngredientsController extends AppController
 
     $prix_conditionnement = $type_conditionnement_data['prix']; // Assigning the value to a variable
 
+    // Préparer les données pour l'affichage
+    $ean13_variante_data = json_decode($produit['Produit']['ean13_variante'], true);
+    $ean13_variante_display = [];
+
+    if (!empty($ean13_variante_data)) {
+        foreach ($ean13_variante_data as $key => $value) {
+            $ean13_variante_display[] = "Conditionnement: {$key}, EAN13: {$value}";
+        }
+    }
+
+    // Joindre les données pour un affichage lisible
+    $ean13_variante_display = implode('<br>', $ean13_variante_display);
+    $this->set(compact('ean13_variante_display'));
+
 
     foreach ($condtionnementproduits as $condtionnement) {
         $id_typeconditionnement = $condtionnement['typeconditionnementtproduits']['id_typeconditionnement'];
