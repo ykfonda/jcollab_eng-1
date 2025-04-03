@@ -4056,6 +4056,8 @@ class PosController extends AppController
     
         echo "Données API trouvées, traitement en cours...<br>";
     
+        $orderIds = [];
+        
         foreach ($response['data'][0] as $order) {
             if (!isset($order['id'], $order['date_created'], $order['payment_method'], $order['shipment'], $order['customer'], $order['line_items'])) {
                 die("Erreur: Données de commande incomplètes");
@@ -4107,7 +4109,7 @@ class PosController extends AppController
                 'date' => date('Y-m-d', strtotime($order['date_created'])),
                 'store_id' => 1,
                 'statut' => 'comde_in_progress',
-                'customer_id' => $customerId, // Associer la commande au client
+                'customer_id' => $customerId,
                 'total_qte' => array_sum(array_column($order['line_items'], 'quantity')),
                 'total_a_payer_ttc' => array_sum(array_map(function($item) {
                     return isset($item['unit_price']) ? $item['unit_price'] * $item['quantity'] : 0;
@@ -4117,6 +4119,7 @@ class PosController extends AppController
             if ($this->Ecommerce->save($ecommerceData)) {
                 $ecommerceId = $this->Ecommerce->id; 
                 echo "Commande enregistrée avec ID: " . $ecommerceId . "<br>";
+                $orderIds[] = $order['id'];
     
                 foreach ($order['line_items'] as $lineItem) {
                     $this->Ecommercedetail->create();
@@ -4147,7 +4150,44 @@ class PosController extends AppController
                 die();
             }
         }
+    
+        if (!empty($orderIds)) {
+            $this->confirmOrders($orderIds);
+        }
     }
+    
+    // Fonction pour confirmer les commandes
+    public function confirmOrders($orderIds) {
+        $this->autoRender = false;
+    
+        $parametres = $this->GetParametreSte();
+        $url = "https://lafonda-uat.o2usd.net/rest/api/orders/confirm-orders";
+        $user = $parametres['User'];
+        $password = $parametres['Password'];
+    
+        $data = json_encode(['order_ids' => $orderIds]);
+    
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Authorization: Basic ' . base64_encode($user . ':' . $password)
+        ]);
+    
+        $response = curl_exec($ch);
+    
+        if (curl_errno($ch)) {
+            echo "Erreur lors de la confirmation des commandes: " . curl_error($ch);
+        } else {
+            echo "Commandes confirmées: " . $response;
+        }
+    
+        curl_close($ch);
+    }
+
     
 
 
