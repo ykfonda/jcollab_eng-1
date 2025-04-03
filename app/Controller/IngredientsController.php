@@ -489,7 +489,7 @@ class IngredientsController extends AppController
         die(json_encode($stores));
     }
 
-    public function view($id = null)
+    public function viewOldIsGold($id = null)
     {
         $sortie = [];
         $mouvements = [];
@@ -732,6 +732,115 @@ class IngredientsController extends AppController
         return $data2DArray;
     }
 
+
+    public function view($id = null)
+{
+    $quantite_general = 0;
+    $depotproduits = 0;
+    $mouvements = [];
+    $sortie = [];
+    $tvas = $this->Produit->TvaAchat->findList();
+    $unites = $this->Produit->Unite->find('list', ['order' => 'libelle asc']);
+    $categorieproduits = $this->Produit->Categorieproduit->find('list', ['order' => 'libelle asc']);
+    $souscategorieproduits = $this->Produit->Souscategorieproduit->find('list', ['order' => 'libelle asc']);
+    $condtionnements = $this->Produit->Typeconditionnement->findList();
+
+    if ($this->Produit->exists($id)) {
+        // Récupération du produit
+        $options = ['conditions' => ['Produit.' . $this->Produit->primaryKey => $id]];
+        $produit = $this->Produit->find('first', $options);
+        $this->request->data = $produit;
+
+        // Récupération des produits liés au dépôt
+        $depotproduits = $this->Produit->Depotproduit->find('all', [
+            'fields' => ['Depotproduit.*', 'Depot.*'],
+            'conditions' => ['produit_id' => $id],
+            'joins' => [
+                ['table' => 'depots', 'alias' => 'Depot', 'type' => 'INNER', 'conditions' => ['Depotproduit.depot_id = Depot.id']],
+            ],
+            'order' => ['Depotproduit.date' => 'DESC'],
+        ]);
+
+        // Récupération des mouvements sortants et entrants
+        $mouvements = $this->Produit->Mouvement->find('all', [
+            'contain' => ['DepotSource', 'DepotDestination'],
+            'conditions' => [
+                'Mouvement.produit_id' => $id,
+                'Mouvement.operation' => -1,
+            ],
+            'order' => ['Mouvement.id' => 'DESC'],
+        ]);
+
+        $sortie = $this->Produit->Mouvement->find('all', [
+            'contain' => ['DepotSource', 'DepotDestination'],
+            'conditions' => [
+                'Mouvement.produit_id' => $id,
+                'Mouvement.operation' => 1,
+            ],
+            'order' => ['Mouvement.id' => 'DESC'],
+        ]);
+
+        // Calcul de la quantité générale
+        $quantite_actual_entree = 0;
+        foreach ($mouvements as $key => $value) {
+            $quantite_actual_entree += $value['Mouvement']['stock_source'];
+        }
+
+        $quantite_actual_sortie = 0;
+        foreach ($sortie as $key => $value) {
+            $quantite_actual_sortie += $value['Mouvement']['stock_source'];
+        }
+
+        $quantite_general = (isset($this->request->data['Produit']['stockactuel']) && !empty($this->request->data['Produit']['stockactuel'])) ? (int)$this->request->data['Produit']['stockactuel'] : 0;
+        $total_stock = (!empty($quantite_general) && !empty($this->request->data['Produit']['prixachat'])) ? (float)$quantite_general * $this->request->data['Produit']['prixachat'] : 0;
+    }
+
+    // Récupération des types de conditionnement associés au produit
+    $condtionnementproduits = $this->Produit->Typeconditionnementtproduit->query("SELECT * FROM typeconditionnementtproduits WHERE id_produit = {$id};");
+    $typeconditionnementslibelles = [];
+
+
+    // Récupération des types de conditionnement disponibles
+    $type_conditionnement_data = json_decode($produit['Produit']['type_conditionnement'], true);
+    $typeconditionnementslibelles = isset($type_conditionnement_data['prix']) ? 
+    
+    $type_conditionnement_data['prix'] : [];
+
+    $prix_conditionnement = $type_conditionnement_data['prix']; // Assigning the value to a variable
+
+
+    foreach ($condtionnementproduits as $condtionnement) {
+        $id_typeconditionnement = $condtionnement['typeconditionnementtproduits']['id_typeconditionnement'];
+        $typeconditionnement = $this->Produit->Typeconditionnement->find('list', ['conditions' => ['id' => $id_typeconditionnement]]);
+        $typeconditionnementslibelles[] = $typeconditionnement[$id_typeconditionnement];
+    }
+
+    // Récupération des options associées au produit
+    $optionproduits = $this->Produit->Optionproduit->query("SELECT * FROM optionproduits WHERE id_produit = {$id};");
+    $optionlibelles = [];
+    foreach ($optionproduits as $optionproduit) {
+        $id_option = $optionproduit['optionproduits']['id_option'];
+        $option = $this->Produit->Options->find('list', ['conditions' => ['id' => $id_option]]);
+        $optionlibelles[] = $option[$id_option];
+    }
+
+    // Récupération des options disponibles
+    $options = $this->Produit->Options->findList();
+
+    // Récupération de la sous-catégorie du produit
+    $soucategid = $this->Produit->find('first', ['conditions' => ['id' => $id]]);
+    $souscategorieproduits_id = $this->Produit->Souscategorieproduit->find('first', [
+        'conditions' => ['Souscategorieproduit.id' => $soucategid['Produit']['souscategorieproduit_id']],
+        'order' => 'libelle asc',
+    ]);
+    $souscategorieproduits_id = isset($souscategorieproduits_id['Souscategorieproduit']['libelle']) ? $souscategorieproduits_id['Souscategorieproduit']['libelle'] : 0;
+
+    $this->set(compact('optionlibelles', 'souscategorieproduits_id', 'typeconditionnementslibelles', 'depotproduits', 'mouvements', 'categorieproduits', 'total_stock', 'sortie', 'quantite_general', 'souscategorieproduits', 'total_stock_ht', 'unites', 'tvas', 'condtionnements', 'prix_conditionnement', 'options'));
+    $this->getPath($this->idModule);
+}
+
+
+
     public function importer()
     {
         $champs = [];
@@ -917,7 +1026,7 @@ class IngredientsController extends AppController
 
         	// API TEMP
             // Pour l'équipe de NEXA
-            public function apiGetEngProducts($store_id = null, $caisse_id = null, $salepoint_id = null)
+            public function apiGetEngProducts($store_id = null)
             {
                 // Définir le type de réponse
                 $this->response->type('json');

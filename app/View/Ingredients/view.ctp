@@ -193,14 +193,26 @@
           </div>
         </div>
         <div class="form-group row">
-          <label class="control-label col-md-2">Type Conditionnement</label>
+          <label class="control-label col-md-2">Type Conditionnemento</label>
           <div class="col-md-8">
-             <select name="data[Produit][type_conditionnement][]" class="select2 form-control" multiple="multiple" id="ProduitTypeConditionnement">
-             <?php foreach ($condtionnements as $key => $value) { ?>
-                <option value="<?php echo $key; ?>" <?php if (in_array($value, $typeconditionnementslibelles)) { ?>
-                selected <?php } ?>><?php echo $value; ?></option>   
-              <?php } ?>
-            </select>
+
+        <table class="table table-bordered table-striped table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Conditionnement</th>
+                    <th>Prix</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($prix_conditionnement as $prix => $conditionnement): ?>
+                    <tr>
+                        <td><?php echo h($conditionnement); ?></td>
+                        <td><?php echo h($prix . " DH"); ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+
           </div>
         </div>
         <div class="form-group row">
