@@ -295,3 +295,19 @@ Indexation des tables :
 - Ajouter les tableaux nécessaire
 - Bug de génération de A4 : création de compte client à chaque fois de génération, voila partie administration
 - Module Statistiques
+- Faire une relation unité et Type Conditionnement
+
+
+
+NEXA API
+- Mot de passe te body config puor l'api de PRODUIT
+
+
+API ORDER => dans la base des donées JCOLLAB il faut ajouté weight_ordered
+
+
+
+
+Journal des modifications (CHANGELOG) :
+03/03/2025 : Récupération des données
+            Confirmation de l'API après l'enregistrement
