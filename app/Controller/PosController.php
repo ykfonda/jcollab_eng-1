@@ -709,7 +709,7 @@ class PosController extends AppController
     public function generatecommandes()
     {
         if (!function_exists('curl_init')) {
-            die('cURL is not enabled. Please enable cURL in your PHP configuration.');
+            die('JCOLLAB NEEDS CONFIG - cURL is not enabled. Please enable cURL in your PHP configuration.');
         }
 
         $ch = curl_init();
@@ -717,8 +717,7 @@ class PosController extends AppController
 
         $url = $parametres['Api pending'];
 
-        var_dump($parametres);
-        die();
+
         
         $headers = [
             'Content-Type:application/json',
@@ -856,9 +855,15 @@ class PosController extends AppController
     // fonction de récupération des ventes ecome => pop-up de POS
     public function ecommerce($salepoint_id = null, $barcode = null)
     {
-        $this->generatecommandes();
+        // $this->generatecommandes();
+
+        // $this->SaveOrdersFromApi();  // save orders from API to DB - WEBSITE NEXA
+        
         $conditions['Ecommerce.etat'] = -1;
+        // $conditions['Ecommerce.statut !='] = 'en cours'; // Ancienne version
+        $conditions['Ecommerce.deleted'] = 0;
         $conditions['Ecommerce.statut !='] = 'en cours';
+        $conditions['Ecommerce.statut ='] = 'comde_in_progress';
         $conditions['Ecommerce.store_id'] = $this->Session->read('Auth.User.StoreSession.id');
 
         $ecommerces = $this->Ecommerce->find('all', [
@@ -4023,81 +4028,136 @@ class PosController extends AppController
     }
 
 
-    public function saveOrdersFromApi() {
 
-        $this->loadModel('Ecommerce');
-        $this->loadModel('Ecommercedetail');
-
-        // Désactiver le rendu automatique de la vue
+    // Website: Récupérer les commandes en attente
+    public function SaveOrdersFromApi() {
+        $this->loadModel('Ecommerce'); 
+        $this->loadModel('Ecommercedetail'); 
+        $this->loadModel('Client');
+    
         $this->autoRender = false;
-        
+    
         // Récupérer les paramètres API
         $parametres = $this->GetParametreSte();
         $url = $parametres['Api pending'];
         $user = $parametres['User'];
         $password = $parametres['Password'];
     
-        // Récupérer le site avant d'appeler la fonction
-        $store_id = $this->Session->read('Auth.User.StoreSession.id');
-        $storeSession = $this->Store->find('first', [
-            'conditions' => ['Store.id' => $store_id], 
-            'contain' => ['Societe']
-        ]);
-        $site = $storeSession['Store']['id_ecommerce']; // Assurez-vous que le champ id_ecommerce existe
-
-        // Effectuer la requête vers l'API pour récupérer les données
+        echo "Début du script<br>";
+    
+        // Effectuer la requête vers l'API pour récupérer les commandes
         $response = $this->callApi();
-
-
-        // Vérifier si la réponse est valide
-        if ($response && $response['success'] && isset($response['data'])) {
-            foreach ($response['data'] as $orderData) {
-                foreach ($orderData as $order) {
-                    // Sauvegarder la commande principale
-                    $orderEntity = $this->Order->create([
-                        'barcode' => $order['id'],
-                        'online_id' => $order['id'],
-                        'fee' => $order['fee'],
-                        'shipment' => $order['shipment'],
-                        'payment_method' => $order['payment_method'],
-                        'adresse' => $order['customer']['address'],
-                        'date' => date('Y-m-d', strtotime($order['date_created'])),
-                        'store_id' => $this->Session->read('Auth.User.StoreSession.id'),
-                    ]);
-                    if ($this->Order->save($orderEntity)) {
-                        // Sauvegarder les détails de la commande (produits)
-                        foreach ($order['line_items'] as $lineItem) {
-                            $lineItemEntity = $this->OrderDetail->create([
-                                'unit_price' => $lineItem['unit_price'],
-                                'prix_vente' => $lineItem['unit_price'],
-                                'produit_id' => $lineItem['product_id'], // Assurez-vous que ce produit existe dans votre base
-                                'online_id' => $lineItem['id'],
-                                'qte_cmd' => $lineItem['quantity'],
-                                'qte_ordered' => $lineItem['quantity'],
-                                'total' => 0, // Vous pouvez calculer ici le total si nécessaire
-                                'ttc' => 0,   // Vous pouvez calculer ici le TTC si nécessaire
-                                'qte' => $lineItem['quantity'],
-                                'order_id' => $this->Order->id, // Lier le détail à la commande
-                            ]);
-                            $this->OrderDetail->save($lineItemEntity);
-                        }
+    
+        echo "Vérification de la réponse API<br>";
+        
+        if (!isset($response['data'][0])) { 
+            die("Erreur: Données API introuvables");
+        }
+    
+        echo "Données API trouvées, traitement en cours...<br>";
+    
+        foreach ($response['data'][0] as $order) {
+            if (!isset($order['id'], $order['date_created'], $order['payment_method'], $order['shipment'], $order['customer'], $order['line_items'])) {
+                die("Erreur: Données de commande incomplètes");
+            }
+    
+            echo "Traitement de la commande ID: " . $order['id'] . "<br>";
+    
+            // Gestion du client
+            $customerData = [
+                'id_ecommerce' => $order['customer']['id'],
+                'designation' => $order['customer']['name'],
+                'telmobile' => $order['customer']['phone'],
+                'email' => $order['customer']['email'],
+                'adresse' => $order['customer']['address'],
+            ];
+    
+            $existingCustomer = $this->Client->find('first', [
+                'conditions' => ['Client.id_ecommerce' => $customerData['id_ecommerce']]
+            ]);
+    
+            if ($existingCustomer) {
+                $this->Client->id = $existingCustomer['Client']['id'];
+                // Mise à jour du total_vente
+                $totalVente = $existingCustomer['Client']['total_vente'] + $order['total'];
+                $customerData['total_vente'] = $totalVente;
+            } else {
+                $this->Client->create();
+                $customerData['total_vente'] = $order['total'];
+            }
+            
+            if ($this->Client->save($customerData)) {
+                $customerId = $this->Client->id;
+                echo "Client enregistré avec ID: " . $customerId . "<br>";
+            } else {
+                echo "Échec d'enregistrement du client: ";
+                debug($this->Client->validationErrors);
+                die();
+            }
+    
+            // Enregistrement de la commande
+            $this->Ecommerce->create();
+            $ecommerceData = [
+                'barcode' => $order['id'],
+                'online_id' => $order['id'],
+                'fee' => isset($order['fee']) ? $order['fee'] : "0.00",
+                'shipment' => $order['shipment'],
+                'payment_method' => $order['payment_method'],
+                'adresse' => $order['customer']['address'],
+                'date' => date('Y-m-d', strtotime($order['date_created'])),
+                'store_id' => 1,
+                'statut' => 'comde_in_progress',
+                'customer_id' => $customerId, // Associer la commande au client
+                'total_qte' => array_sum(array_column($order['line_items'], 'quantity')),
+                'total_a_payer_ttc' => array_sum(array_map(function($item) {
+                    return isset($item['unit_price']) ? $item['unit_price'] * $item['quantity'] : 0;
+                }, $order['line_items'])),
+            ];
+    
+            if ($this->Ecommerce->save($ecommerceData)) {
+                $ecommerceId = $this->Ecommerce->id; 
+                echo "Commande enregistrée avec ID: " . $ecommerceId . "<br>";
+    
+                foreach ($order['line_items'] as $lineItem) {
+                    $this->Ecommercedetail->create();
+                    $ecommerceDetailData = [
+                        'unit_price' => $lineItem['unit_price'],
+                        'prix_vente' => $lineItem['unit_price'],
+                        'produit_id' => $lineItem['product_id'],
+                        'online_id' => $lineItem['id'],
+                        'qte_cmd' => $lineItem['quantity'],
+                        'qte_ordered' => $lineItem['quantity'],
+                        'total' => $lineItem['unit_price'] * $lineItem['quantity'],
+                        'ttc' => $lineItem['unit_price'] * $lineItem['quantity'],
+                        'qte' => $lineItem['quantity'],
+                        'ecommerce_id' => $ecommerceId,
+                    ];
+    
+                    if ($this->Ecommercedetail->save($ecommerceDetailData)) {
+                        echo "Détail enregistré pour produit ID: " . $lineItem['product_id'] . "<br>";
+                    } else {
+                        echo "Échec d'enregistrement du détail produit: ";
+                        debug($this->Ecommercedetail->validationErrors);
+                        die();
                     }
                 }
+            } else {
+                echo "Échec d'enregistrement de la commande: ";
+                debug($this->Ecommerce->validationErrors);
+                die();
             }
-        } else {
-            $this->Session->setFlash('Erreur lors de la récupération des données de l\'API');
         }
     }
     
-    // Fonction pour appeler l'API
+
+
+        // Fonction pour appeler l'API en GET avec authentification
     public function callApi() {
         $this->autoRender = false;
-    
+
+        $url = "https://lafonda-uat.o2usd.net/rest/api/orders/pending?site=1"; // Ajout du paramètre dans l'URL
+
         $ch = curl_init();
-        $url = "https://lafonda-uat.o2usd.net/rest/api/orders/pending";
-        
-        $data = json_encode(['site' => 1]);
-    
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_ENCODING, '');
@@ -4105,23 +4165,24 @@ class PosController extends AppController
         curl_setopt($ch, CURLOPT_TIMEOUT, 0);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET'); // Méthode GET
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
             'Authorization: Basic ' . base64_encode('restapi:DSDS@$%^&@#')
         ]);
-    
+
         $response = curl_exec($ch);
-    
+
         if (curl_errno($ch)) {
             return ['success' => false, 'error' => curl_error($ch)];
         }
-    
+
         curl_close($ch);
-    
+
         return json_decode($response, true);
     }
+
+
 
 
     public function GetClient($client_id = 2) {
