@@ -1069,8 +1069,13 @@ class IngredientsController extends AppController
                     if (isset($produit['Produit']['code_barre'])) {
                         $produit['Produit']['code_barre'] = '2008' . $produit['Produit']['code_barre'];
                     }
+                
+                    if (!empty($produit['Produit']['type_conditionnement'])) {
+                        $produit['Produit']['type_conditionnement'] = json_decode($produit['Produit']['type_conditionnement'], true);
+                    }
                 }
-            
+
+                
                 // Afficher les données en format JSON
                 echo json_encode($produits);
             
