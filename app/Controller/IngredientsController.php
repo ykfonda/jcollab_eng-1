@@ -1047,11 +1047,22 @@ class IngredientsController extends AppController
             
                 // Récupérer les données de la table "Produit"
                 $produits = $this->Produit->find('all', [
+                    'fields' => [
+                        'Produit.code_barre',
+                        'Produit.libelle',
+                        'Produit.description',
+                        'Produit.active',
+                        'Produit.prix_vente',
+                        'Produit.pese',
+                        'Produit.unite_id',
+                        'Produit.type_conditionnement',
+                    ],
                     'conditions' => [
                         'Produit.deleted' => 0,
-                      //  'Produit.id' => 634,
+                        // 'Produit.id' => 634, // décommente pour filtrer par ID
                     ]
                 ]);
+                
             
                 // Ajouter le préfixe "2008" au champ "code_barre" pour chaque produit
                 foreach ($produits as &$produit) {
