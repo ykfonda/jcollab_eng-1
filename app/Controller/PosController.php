@@ -2512,6 +2512,51 @@ class PosController extends AppController
         die(json_encode($response));
     }
 
+    public function getProduitParEAN13($code_ean13) {
+        $this->autoRender = false;
+    
+        $produit = $this->Produit->find('first', [
+            'fields' => ['Produit.prix_vente'], // <-- ici on récupère juste prix_vente
+            'conditions' => [
+                'Produit.type' => 2,
+                'Ean13Code.code_ean13' => $code_ean13
+            ],
+            'joins' => [
+                [
+                    'table' => 'ean13_codes',
+                    'alias' => 'Ean13Code',
+                    'type' => 'INNER',
+                    'conditions' => ['Ean13Code.produit_id = Produit.id']
+                ]
+            ]
+        ]);
+    
+        if (!empty($produit)) {
+            return $produit;
+        } else {
+            return ['error' => 'Produit non trouvé'];
+        }
+    }
+
+
+    public function getEan13Details($code_ean13) {
+        $this->autoRender = false;
+    
+        $this->loadModel('Ean13Code');
+    
+        $ean = $this->Ean13Code->find('first', [
+            'conditions' => ['Ean13Code.code_ean13' => $code_ean13]
+        ]);
+    
+    
+        if (!empty($ean)) {
+            return $ean['Ean13Code'];
+        }
+    
+        return null;
+    }
+    
+    
     public function scan($code_barre = null, $salepoint_id = null)
     {
 
@@ -2533,9 +2578,21 @@ class PosController extends AppController
 
             $identifiant = substr(trim($code_barre), 0, 4);
                
-                if ($identifiant != 2900) {
-                    $produit = $this->Produit->find('first', ['fields' => ['id','code_barre'], 'conditions' => ['Produit.type' => 2, 'Produit.ean13' => $code_barre]]);
-                    $code_article = $produit['Produit']['code_barre'];
+                if ($identifiant != 2900) {                    
+                    // Old script 
+                        // $produit = $this->Produit->find('first', ['fields' => ['id','code_barre'], 'conditions' => ['Produit.type' => 2, 'Produit.ean13' => $code_barre]]);
+                         //$code_article = $produit['Produit']['code_barre'];
+
+
+                         $code_ean13 = $code_barre;
+                         $produit = $this->getEan13Details($code_ean13);
+ 
+                         if (!empty($produit)) {
+                             $code_article = $produit['code_barre'];
+                         } else {
+                             echo 'Produit non trouvé';
+                         }
+
                     $quantite = 1;
                 }
 
@@ -2548,7 +2605,30 @@ class PosController extends AppController
 
                 if (!empty($code_article)) {
 
-                    $produit = $this->Produit->find('first', ['fields' => ['id', 'pese', 'prix_vente', 'unite_id', 'tva_vente'], 'conditions' => ['Produit.type' => 2, 'Produit.code_barre' => $code_article]]);
+                    // Old script 
+                    // $produit = $this->Produit->find('first', ['fields' => ['id', 'pese', 'prix_vente', 'unite_id', 'tva_vente'], 'conditions' => ['Produit.type' => 2, 'Produit.code_barre' => $code_article]]);
+
+                    // Étape 1 : requête sans prix_vente
+                    $produit = $this->Produit->find('first', [
+                        'fields' => ['id', 'pese', 'unite_id', 'tva_vente'],
+                        'conditions' => [
+                            'Produit.type' => 2,
+                            'Produit.code_barre' => $code_article
+                        ]
+                    ]);
+
+                    // Étape 2 : récupérer prix_vente depuis EAN13
+
+                    $code_ean13 = $code_barre;
+                    $details = $this->getEan13Details($code_ean13);
+
+                   
+                    // Étape 3 : injecter prix_vente dans le même tableau
+                    if (!empty($details['prix_vente'])) {
+                        $produit['Produit']['prix_vente'] = $details['prix_vente'];
+                    }
+
+
 
 
                     if (isset($produit['Produit']['id']) and !empty($produit['Produit']['id'])) {
