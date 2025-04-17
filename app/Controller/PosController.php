@@ -1857,6 +1857,7 @@ class PosController extends AppController
         die(json_encode($response));
     }
 
+    // Scan ECOM
     public function updatelineDE($salepoint_id, $salepointdetail_id, $code_barre)
     {
         $response['error'] = true;
