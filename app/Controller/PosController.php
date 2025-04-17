@@ -2541,13 +2541,17 @@ class PosController extends AppController
 
     public function getEan13Details($code_ean13) {
         $this->autoRender = false;
+        // il faut ajouter le store ID ici
+        $store_id = $this->Session->read('Auth.User.StoreSession.id');
     
         $this->loadModel('Ean13Code');
     
         $ean = $this->Ean13Code->find('first', [
-            'conditions' => ['Ean13Code.code_ean13' => $code_ean13]
+            'conditions' => [
+                'Ean13Code.code_ean13' => $code_ean13,
+                'Ean13Code.store_id' => $store_id
+            ]
         ]);
-    
     
         if (!empty($ean)) {
             return $ean['Ean13Code'];
@@ -2627,9 +2631,6 @@ class PosController extends AppController
                     if (!empty($details['prix_vente'])) {
                         $produit['Produit']['prix_vente'] = $details['prix_vente'];
                     }
-
-
-
 
                     if (isset($produit['Produit']['id']) and !empty($produit['Produit']['id'])) {
                         if (isset($produit['Produit']['pese']) and $produit['Produit']['pese'] == '1') {
