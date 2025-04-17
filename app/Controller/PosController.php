@@ -2631,6 +2631,11 @@ class PosController extends AppController
                     if (!empty($details['prix_vente'])) {
                         $produit['Produit']['prix_vente'] = $details['prix_vente'];
                     }
+                    // Vérification de l'existence de prix_vente
+                    if (empty($details['prix_vente'])) {
+                        $this->Session->setFlash('Le prix de vente est introuvable pour ce produit.', 'alert-danger');
+                        return $this->redirect($this->referer());
+                    }
 
                     if (isset($produit['Produit']['id']) and !empty($produit['Produit']['id'])) {
                         if (isset($produit['Produit']['pese']) and $produit['Produit']['pese'] == '1') {
