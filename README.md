@@ -311,3 +311,7 @@ API ORDER => dans la base des donées JCOLLAB il faut ajouté weight_ordered
 Journal des modifications (CHANGELOG) :
 03/03/2025 : Récupération des données
             Confirmation de l'API après l'enregistrement
+
+
+- Nouvelle api => NEXA
+- ECOM : Les new API
