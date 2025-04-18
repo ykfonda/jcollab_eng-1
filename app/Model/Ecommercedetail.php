@@ -1,7 +1,14 @@
 <?php 
 class Ecommercedetail extends AppModel
 {
-	public $belongsTo = ['Ecommerce','Produit'];
+	public $belongsTo = [
+		'Ecommerce',
+		'Produit' => [
+			'className' => 'Produit',
+			'foreignKey' => 'produit_id'
+		]
+	];
+	
 
 	public function beforeSave($options = array()){
 		parent::beforeSave($options);

@@ -1051,4 +1051,57 @@ $this->set('id', 9);
 
         return $destination.DS.'Ecommerce.'.$data['Ecommerce']['date'].'-'.$data['Ecommerce']['id'].'.pdf';
     }
+
+
+
+
+    public function generateBonPreparation($id = null)
+{
+    $this->layout = null; // Pas de layout global
+    $this->autoRender = false;
+
+    if (!$this->Ecommerce->exists($id)) {
+        throw new NotFoundException(__('Commande non trouvée'));
+    }
+
+    // Récupération des données
+    $data = $this->Ecommerce->find('first', [
+        'conditions' => ['Ecommerce.id' => $id],
+        'contain' => [],
+    ]);
+
+    $details = $this->Ecommerce->Ecommercedetail->find('all', [
+        'conditions' => ['Ecommercedetail.ecommerce_id' => $id],
+        'contain' => []
+    ]);
+    
+    $this->loadModel('Produit');
+    
+    foreach ($details as &$detail) {
+        $produit = $this->Produit->find('first', [
+            'conditions' => ['Produit.code_barre' => $detail['Ecommercedetail']['produit_id']], // produit_id est en réalité code_barre
+            'fields' => ['libelle'],
+            'recursive' => -1
+        ]);
+        $detail['Produit']['libelle'] = !empty($produit['Produit']['libelle']) ? $produit['Produit']['libelle'] : '<i>Produit introuvable</i>';
+    }
+    
+    
+    $view = new View($this, false);
+    $view->viewPath = 'Ecommerces';
+    $view->set(compact('data', 'details'));
+    $html = $view->render('generate_bon_preparation');
+
+    // Génération PDF
+    App::import('Vendor', 'dompdf', ['file' => 'dompdf' . DS . 'dompdf_config.inc.php']);
+    $dompdf = new DOMPDF();
+    $dompdf->load_html($html);
+    $dompdf->set_paper('A4', 'portrait');
+    $dompdf->render();
+    $dompdf->stream("Bon_preparation_{$id}.pdf", ['Attachment' => false]);
+}
+
+
+
+    
 }
