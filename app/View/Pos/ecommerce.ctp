@@ -1,12 +1,28 @@
-<div class="modal-header">
-	<h4 class="modal-title">	
-		Liste des commandes e-commerce (<?php echo count( $ecommerces ) ?>)
-	<div style="position: relative;
-    float: right;right : -23rem">
-		Dernière Synchronisation : <?php echo $created_at ?>
-	</div>
-		
+<div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+    <!-- Titre -->
+    <h4 class="modal-title" style="margin: 0;">
+        Liste des commandes e-commerce (<?php echo count($ecommerces); ?>)
+    </h4>
+
+    <!-- Bloc à droite : date + bouton -->
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <!-- Date de synchronisation -->
+        <div style="font-size: 13px; color: #666;">
+            Dernière Synchronisation : <?php echo $created_at ?>
+        </div>
+
+        <!-- Bouton Actualiser -->
+        <div class="input-group-append">
+		<button class="btn btn-default btn-reset-ecommerce" type="button">
+    		<i class="fa fa-refresh" style="color: #007bff; font-size: 14px;"></i> Actualiser
+		</button>
+        </div>
+    </div>
 </div>
+
+
+
+
 <div class="modal-body ">
 	<div class="row">
 		<?php if ( empty( $ecommerces ) ): ?>
@@ -15,13 +31,6 @@
 			</div>
 		<?php else: ?>
 			<div class="col-md-6" style="border:1px solid #e5e5e5;">
-		         <div class="input-group mt-1">
-		            <div class="input-group input-group-merge">
-		                <div class="input-group-append">
-		                  <button class="btn btn-default btn-reset-ecommerce" type="button"><i class="fa fa-refresh"></i>&nbspActualiser</button>
-		                </div>       
-		            </div>
-		        </div>
 				<div class="table-responsive" style="min-height: auto;max-height: 450px;overflow-y: scroll;">
 					<table class="table table-striped table-bordered table-hover" cellpadding="0" cellspacing="0">
 						<thead>
