@@ -1055,56 +1055,57 @@ $this->set('id', 9);
 
 
 
-    public function generateBonPreparation($id = null)
-{
-    $this->layout = null; // Pas de layout global
-    $this->autoRender = false;
+        public function generateBonPreparation($id = null)
+    {
+        $this->layout = null; // Pas de layout global
+        $this->autoRender = false;
 
-    if (!$this->Ecommerce->exists($id)) {
-        throw new NotFoundException(__('Commande non trouvée'));
-    }
+        if (!$this->Ecommerce->exists($id)) {
+            throw new NotFoundException(__('Commande non trouvée'));
+        }
 
-    // Récupération des données
-    $data = $this->Ecommerce->find('first', [
-        'conditions' => ['Ecommerce.id' => $id],
-        'contain' => [],
-    ]);
-
-    $details = $this->Ecommerce->Ecommercedetail->find('all', [
-        'conditions' => ['Ecommercedetail.ecommerce_id' => $id],
-        'contain' => []
-    ]);
-    
-    $this->loadModel('Produit');
-    
-    foreach ($details as &$detail) {
-        $produit = $this->Produit->find('first', [
-            'conditions' => ['Produit.code_barre' => $detail['Ecommercedetail']['produit_id']], // produit_id est en réalité code_barre
-            'fields' => ['libelle'],
-            'recursive' => -1
+        // Récupération des données
+        $data = $this->Ecommerce->find('first', [
+            'conditions' => ['Ecommerce.id' => $id],
+            'contain' => [],
         ]);
-        $detail['Produit']['libelle'] = !empty($produit['Produit']['libelle']) ? $produit['Produit']['libelle'] : '<i>Produit introuvable</i>';
+
+        $details = $this->Ecommerce->Ecommercedetail->find('all', [
+            'conditions' => ['Ecommercedetail.ecommerce_id' => $id],
+            'contain' => []
+        ]);
+        
+        $this->loadModel('Produit');
+        
+        foreach ($details as &$detail) {
+            $produit = $this->Produit->find('first', [
+                'conditions' => ['Produit.code_barre' => $detail['Ecommercedetail']['produit_id']], // produit_id est en réalité code_barre
+                'fields' => ['libelle'],
+                'recursive' => -1
+            ]);
+            $detail['Produit']['libelle'] = !empty($produit['Produit']['libelle']) ? $produit['Produit']['libelle'] : '<i>Produit introuvable</i>';
+        }
+
+
+        // Appel la function changeStatus pour changer le statut de la commande
+        $this->changeStatus($id, 'in_preparation');
+
+        $view = new View($this, false);
+        $view->viewPath = 'Ecommerces';
+        $view->set(compact('data', 'details'));
+        $html = $view->render('generate_bon_preparation');
+
+        // Génération PDF
+        App::import('Vendor', 'dompdf', ['file' => 'dompdf' . DS . 'dompdf_config.inc.php']);
+        $dompdf = new DOMPDF();
+        $dompdf->load_html($html);
+        $dompdf->set_paper('A4', 'portrait');
+        $dompdf->render();
+        $dompdf->stream("Bon_preparation_{$id}.pdf", ['Attachment' => false]);
     }
 
-    
-    $view = new View($this, false);
-    $view->viewPath = 'Ecommerces';
-    $view->set(compact('data', 'details'));
-    $html = $view->render('generate_bon_preparation');
 
-    // Génération PDF
-    App::import('Vendor', 'dompdf', ['file' => 'dompdf' . DS . 'dompdf_config.inc.php']);
-    $dompdf = new DOMPDF();
-    $dompdf->load_html($html);
-    $dompdf->set_paper('A4', 'portrait');
-    $dompdf->render();
-    $dompdf->stream("Bon_preparation_{$id}.pdf", ['Attachment' => false]);
-}
-
-
-
-        
-    public function markInPreparation($id = null)
+    public function changeStatus($id = null, $status = null)
     {
         $this->autoRender = false;
 
@@ -1141,7 +1142,7 @@ $this->set('id', 9);
         $payload = [
             'site' => 1,
             'id' => (int)$onlineId,
-            'status' => 'in_preparation',
+            'status' => $status,
             'payment_method' => 'cod',
             'shipment' => 'delivery',
             'line_items' => $line_items
