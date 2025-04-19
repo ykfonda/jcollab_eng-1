@@ -1085,7 +1085,7 @@ $this->set('id', 9);
         ]);
         $detail['Produit']['libelle'] = !empty($produit['Produit']['libelle']) ? $produit['Produit']['libelle'] : '<i>Produit introuvable</i>';
     }
-    
+
     
     $view = new View($this, false);
     $view->viewPath = 'Ecommerces';
@@ -1101,6 +1101,79 @@ $this->set('id', 9);
     $dompdf->stream("Bon_preparation_{$id}.pdf", ['Attachment' => false]);
 }
 
+
+
+        
+    public function markInPreparation($id = null)
+    {
+        $this->autoRender = false;
+
+        if (!$id) {
+            throw new NotFoundException(__('Commande non trouvée'));
+        }
+
+        $parametres = $this->GetParametreSte();
+        $user = $parametres['User'];
+        $password = $parametres['Password'];
+        $url = $parametres['Api update pos'];
+
+        $ecommerce = $this->Ecommerce->find('first', [
+            'conditions' => ['Ecommerce.id' => $id],
+            'contain' => ['Ecommercedetail'] // bien au singulier, correspond à l'alias
+        ]);
+        
+        $line_items = [];
+        if (!empty($ecommerce['Ecommercedetail'])) {
+            foreach ($ecommerce['Ecommercedetail'] as $item) {
+                $line_items[] = [
+                    'id' => (int)$item['id'],
+                    'product_id' => (int)$item['produit_id'],
+                    'quantity' => (float)$item['qte'],
+                    'unit_price' => number_format($item['prix_vente'], 4, '.', '')
+                ];
+            }
+        }
+        
+        // Numéro de commande
+        $onlineId = $ecommerce['Ecommerce']['online_id'];
+
+        // Payload complet
+        $payload = [
+            'site' => 1,
+            'id' => (int)$onlineId,
+            'status' => 'in_preparation',
+            'payment_method' => 'cod',
+            'shipment' => 'delivery',
+            'line_items' => $line_items
+        ];
+
+        $jsonData = json_encode($payload);
+
+        // Envoi via CURL
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Authorization: Basic ' . base64_encode($user . ':' . $password)
+        ]);
+
+        $response = curl_exec($ch);
+
+        if (curl_errno($ch)) {
+            $error = curl_error($ch);
+            curl_close($ch);
+            $this->Session->setFlash("Erreur CURL : $error", 'default', [], 'error');
+            $this->redirect($this->referer());
+        }
+
+        curl_close($ch);
+
+        $this->Session->setFlash('Commande marquée "in_preparation" avec succès.', 'default', [], 'success');
+        // $this->redirect($this->referer());
+    }
 
 
     

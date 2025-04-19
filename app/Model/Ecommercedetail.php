@@ -8,6 +8,15 @@ class Ecommercedetail extends AppModel
 			'foreignKey' => 'produit_id'
 		]
 	];
+
+	public $hasMany = [
+		'Ecommercedetail' => [ // bien au singulier
+			'className' => 'Ecommercedetail',
+			'foreignKey' => 'ecommerce_id',
+			'dependent' => true
+		]
+	];
+	
 	
 
 	public function beforeSave($options = array()){
