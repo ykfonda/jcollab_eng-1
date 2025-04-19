@@ -1105,7 +1105,7 @@ $this->set('id', 9);
     }
 
 
-    public function changeStatus($id = null, $status = null)
+        public function changeStatus($id = null, $status = null)
     {
         $this->autoRender = false;
 
@@ -1120,9 +1120,9 @@ $this->set('id', 9);
 
         $ecommerce = $this->Ecommerce->find('first', [
             'conditions' => ['Ecommerce.id' => $id],
-            'contain' => ['Ecommercedetail'] // bien au singulier, correspond à l'alias
+            'contain' => ['Ecommercedetail']
         ]);
-        
+
         $line_items = [];
         if (!empty($ecommerce['Ecommercedetail'])) {
             foreach ($ecommerce['Ecommercedetail'] as $item) {
@@ -1134,11 +1134,9 @@ $this->set('id', 9);
                 ];
             }
         }
-        
-        // Numéro de commande
+
         $onlineId = $ecommerce['Ecommerce']['online_id'];
 
-        // Payload complet
         $payload = [
             'site' => 1,
             'id' => (int)$onlineId,
@@ -1150,7 +1148,6 @@ $this->set('id', 9);
 
         $jsonData = json_encode($payload);
 
-        // Envoi via CURL
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -1172,8 +1169,22 @@ $this->set('id', 9);
 
         curl_close($ch);
 
-        $this->Session->setFlash('Commande marquée "in_preparation" avec succès.', 'default', [], 'success');
-        // $this->redirect($this->referer());
+        // Décoder la réponse
+        $decoded = json_decode($response, true);
+
+        // Si l'API a répondu avec succès
+        if (!empty($decoded['success']) && $decoded['success'] === true) {
+            // Mettre à jour le statut dans la base locale
+            $this->Ecommerce->id = $id;
+            $this->Ecommerce->saveField('statut', $status);
+
+            $this->Session->setFlash('Commande mise à jour avec succès. Nouveau statut : ' . $status, 'default', [], 'success');
+        } else {
+            $msg = !empty($decoded['message']) ? $decoded['message'] : 'Erreur inconnue lors de la mise à jour.';
+            $this->Session->setFlash('Erreur API : ' . $msg, 'default', [], 'error');
+        }
+
+       // $this->redirect($this->referer());
     }
 
 
