@@ -1987,6 +1987,7 @@ class PosController extends AppController
         die(json_encode($response));
     }
 
+    // Scan ECOME => à verfier --------------------------------
     public function updateline($code_barre = null, $salepoint_id = null)
     {
         $response['error'] = true;
@@ -2003,19 +2004,58 @@ class PosController extends AppController
             $cb_quantite_longeur = (isset($params['cb_quantite_longeur']) and !empty($params['cb_quantite_longeur'])) ? $params['cb_quantite_longeur'] : 5;
             $cb_div_kg = (isset($params['cb_div_kg']) and !empty($params['cb_div_kg']) and $params['cb_div_kg'] > 0) ? (int) $params['cb_div_kg'] : 1000;
             $identifiant = substr(trim($code_barre), 0, 4);
-            if ($cb_identifiant != $identifiant) {
-                $response['message'] = "Identifiant du code à barre est incorrect , veuillez vérifier votre paramétrage d'application !";
-            } else {
-                $code_article = substr(trim($code_barre), $cb_produit_depart, $cb_produit_longeur);
-                $quantite = substr(trim($code_barre), $cb_quantite_depart, $cb_quantite_longeur);
 
-                $salepoint = $this->Salepoint->find('first', ['conditions' => ['Salepoint.id' => $salepoint_id]]);
+                // $code_article = substr(trim($code_barre), $cb_produit_depart, $cb_produit_longeur);
+                // $quantite = substr(trim($code_barre), $cb_quantite_depart, $cb_quantite_longeur);
+
+                if ($identifiant != 2900) {                    
+                         $code_ean13 = $code_barre;
+                         $produit = $this->getEan13Details($code_ean13);
+                         if (!empty($produit)) {
+                             $code_article = $produit['code_barre'];
+                         } else {
+                             echo 'Produit non trouvé';
+                         }
+                    $quantite = 1;
+                }
+
+                var_dump($code_article);
+            
+
+                $salepoint = $this->Salepoint->find('first', [
+                    'conditions' => [
+                        'Salepoint.id' => $salepoint_id,
+                        'Salepoint.store' => $this->Session->read('Auth.User.StoreSession.id')
+                    ]
+                ]);
+
                 if (isset($salepoint['Salepoint']['ecommerce_id']) or isset($salepoint['Salepoint']['glovo_id'])) {
-                    $produit = $this->Produit->find('first', ['fields' => ['id', 'prix_vente', 'pese', 'tva_vente'], 'conditions' => ['Produit.type' => 2, 'Produit.code_barre' => $code_article]]);
 
+
+                    // $produit = $this->Produit->find('first', ['fields' => ['id', 'prix_vente', 'pese', 'tva_vente'], 'conditions' => ['Produit.type' => 2, 'Produit.code_barre' => $code_article]]);
+
+
+                    
+                    // Étape 1 : requête sans prix_vente
+                    $produit = $this->Produit->find('first', [
+                        'fields' => ['id', 'pese', 'tva_vente'],
+                        'conditions' => [
+                            'Produit.type' => 2,
+                            'Produit.code_barre' => $code_article
+                        ]
+                    ]);
+
+                    // Étape 2 : récupérer prix_vente depuis EAN13
+
+                    $code_ean13 = $code_barre;
+                    $details = $this->getEan13Details($code_ean13);
+                    $nom_produit_EAN13 = $details['nom_produit'];
+
+                    
                     $salepoint_detail = $this->Salepoint->Salepointdetail->find('all', ['conditions' => ['Salepointdetail.produit_id' => $produit['Produit']['id'], 'Salepointdetail.salepoint_id' => $salepoint_id]]);
+
                     if (empty($salepoint_detail)) {
-                        $response['message'] = 'Code a barre incorrect produit introuvable !';
+                        $response['message'] = 'Code a barre incorrect produit introuvable N3 !';
                         header('Content-Type: application/json; charset=UTF-8');
                         die(json_encode($response));
                     }
@@ -2110,7 +2150,7 @@ class PosController extends AppController
                         } else {
                             $qte_cmd = (isset($produit['Salepointdetail']['qte_cmd'])) ? $produit['Salepointdetail']['qte_cmd'] : 0;
                             if (($qte > $qte_cmd and (isset($commandedetail) == false)) || (isset($produit['Salepoint']['glovo_id']) and (!isset($pass)) and ($qte > $qte_cmd * 1.02)) || (isset($ecommerced) and (!isset($pass)) and ($qte > $qte_cmd))) {
-                                $response['message'] = 'la quantité livrée doit étre inferieure ou égale a la quantité commandée !';
+                                $response['message'] = 'la quantité livrée doit étre inferieure ou égale a la quantité commandée 03 !';
                             } else {
                                 $tva = (isset($produit['Produit']['tva_vente']) and !empty($produit['Produit']['tva_vente'])) ? (int) $produit['Produit']['tva_vente'] : 0;
                                 $division_tva = (1 + $tva / 100);
@@ -2307,7 +2347,7 @@ class PosController extends AppController
                 } else {
                     $response['message'] = 'Code a barre incorrect ou vide !';
                 }
-            }
+            
         }
         if ($this->notice == 1) {
             $response['notice'] = true;
