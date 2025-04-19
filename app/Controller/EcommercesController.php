@@ -1088,7 +1088,7 @@ $this->set('id', 9);
 
 
         // Appel la function changeStatus pour changer le statut de la commande
-        $this->changeStatus($id, 'in_preparation');
+         $this->changeStatus($id, 'confirmed');
 
         $view = new View($this, false);
         $view->viewPath = 'Ecommerces';
