@@ -4263,10 +4263,10 @@ class PosController extends AppController
                     $ecommerceDetailData = [
                         'unit_price' => $lineItem['unit_price'],
                         'prix_vente' => $lineItem['unit_price'],
-                        'produit_id' => $lineItem['product_id'],
+                        'code_barre' => $lineItem['product_id'],
                         'online_id' => $lineItem['id'],
                         'qte_cmd' => $lineItem['quantity'],
-                        'qte_ordered' => $lineItem['quantity'],
+                        'qte_ordered' => $lineItem['weight_ordered'],
                         'total' => $lineItem['unit_price'] * $lineItem['quantity'],
                         'ttc' => $lineItem['unit_price'] * $lineItem['quantity'],
                         'qte' => $lineItem['quantity'],
