@@ -490,6 +490,14 @@ class PosController extends AppController
         }
 
         if ($this->Salepoint->saveAssociated($data)) {
+
+            App::import('Controller', 'Ecommerces'); // nom du fichier sans "Controller"
+            $Ecommerces = new EcommercesController(); // nom exact de la classe
+            $Ecommerces->constructClasses(); // charge les modèles
+            $Ecommerces->changeStatus($ecommerce_id, 'in_preparation');
+
+            
+
             $this->calcule($salepoint_id);
             $this->Session->setFlash('L\'action a été effectué avec succès.', 'alert-success');
         } else {
@@ -859,11 +867,14 @@ class PosController extends AppController
 
         // $this->SaveOrdersFromApi();  // save orders from API to DB - WEBSITE NEXA
         
+
+        // La liste des statuts de commande à afficher dans le POS
+        $conditions['Ecommerce.statut'] = ['pending', 'confirmed', 'in_preparation', 'ready_for_delivery','In Progress'];
+
         $conditions['Ecommerce.etat'] = -1;
         // $conditions['Ecommerce.statut !='] = 'en cours'; // Ancienne version
         $conditions['Ecommerce.deleted'] = 0;
         $conditions['Ecommerce.statut !='] = 'en cours';
-        $conditions['Ecommerce.statut ='] = 'comde_in_progress';
         $conditions['Ecommerce.store_id'] = $this->Session->read('Auth.User.StoreSession.id');
 
         $ecommerces = $this->Ecommerce->find('all', [
@@ -1269,8 +1280,17 @@ class PosController extends AppController
             // E-Commerce
             if (isset($salepoint['Salepoint']['ecommerce_id']) and !empty($salepoint['Salepoint']['ecommerce_id'])) {
                 //debug( $salepoint['Salepoint']['total_cmd'] );
-                //debug( $salepoint['Salepoint']['total_apres_reduction'] );
-                //Vérifier :: Le total livré <= le total commandé
+                // debug( $salepoint['Salepoint']['total_apres_reduction'] );
+
+                $ecommerce_id = $salepoint['Salepoint']['ecommerce_id'];
+
+                var_dump($ecommerce_id);
+
+                // Change le statut de la commande e-commerce
+                App::import('Controller', 'Ecommerces'); // nom du fichier sans "Controller"
+                $Ecommerces = new EcommercesController(); // nom exact de la classe
+                $Ecommerces->constructClasses(); // charge les modèles
+                $Ecommerces->changeStatus($ecommerce_id, 'ready_for_delivery');
             }
 
             $avances = $this->Salepoint->Avance->find('list', ['fields' => ['id', 'id'], 'conditions' => ['salepoint_id' => $salepoint_id]]);
@@ -1609,18 +1629,8 @@ class PosController extends AppController
                         }
                     }
                 }
-                //$this->Salepoint->saveField('total_apres_reduction',1.5);
-                if (isset($salepoint['Salepoint']['ecommerce_id']) and !empty($salepoint['Salepoint']['ecommerce_id'])) {
-                    $return_api = $this->UpdateCommande($salepoint_id);
-                    if ($return_api) {
-                        $this->Session->setFlash('Update Api ok', 'alert-success');
-                        $this->Salepoint->saveField('msg_api', 'Update Api ok');
-                    } else {
-                        $this->Session->setFlash('problème Api', 'alert-danger');
-                        $this->Salepoint->saveField('msg_api', 'probleme Api');
-                    }
-                }
 
+                
                 //calcul reste a payer
                 $avances = $this->Salepoint->Avance->find('all', [
                     'conditions' => ['Avance.salepoint_id' => $salepoint_id],
@@ -1874,9 +1884,12 @@ class PosController extends AppController
             $cb_quantite_longeur = (isset($params['cb_quantite_longeur']) and !empty($params['cb_quantite_longeur'])) ? $params['cb_quantite_longeur'] : 5;
             $cb_div_kg = (isset($params['cb_div_kg']) and !empty($params['cb_div_kg']) and $params['cb_div_kg'] > 0) ? (int) $params['cb_div_kg'] : 1000;
             $identifiant = substr(trim($code_barre), 0, 4);
+
             if ($cb_identifiant != $identifiant) {
                 $response['message'] = "Identifiant du code à barre est incorrect , veuillez vérifier votre paramétrage d'application !";
             } else {
+
+
                 $code_article = substr(trim($code_barre), $cb_produit_depart, $cb_produit_longeur);
                 $quantite = substr(trim($code_barre), $cb_quantite_depart, $cb_quantite_longeur);
 

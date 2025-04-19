@@ -39,7 +39,8 @@
                             </tr>
                         </thead>
                         <tbody id="EcommerceList">
-                            <?php foreach ($ecommerces as $dossier): ?>
+                            <?php
+							 foreach ($ecommerces as $dossier): ?>
                                 <tr>
                                     <td nowrap="">
                                         <a class="traitercommande btn btn-warning btn-sm btn-block text-white"
