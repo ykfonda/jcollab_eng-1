@@ -869,7 +869,7 @@ class PosController extends AppController
         
 
         // La liste des statuts de commande à afficher dans le POS
-        $conditions['Ecommerce.statut'] = ['pending', 'confirmed', 'in_preparation', 'ready_for_delivery','In Progress'];
+        $conditions['Ecommerce.statut'] = ['pending', 'confirmed', 'in_preparation', 'ready_for_delivery','comde_in_progress'];
         $conditions['Ecommerce.etat'] = -1;
         $conditions['Ecommerce.deleted'] = 0;
         $conditions['Ecommerce.store_id'] = $this->Session->read('Auth.User.StoreSession.id');
@@ -4263,14 +4263,16 @@ class PosController extends AppController
                     $ecommerceDetailData = [
                         'unit_price' => $lineItem['unit_price'],
                         'prix_vente' => $lineItem['unit_price'],
-                        'code_barre' => $lineItem['product_id'],
+                        // 'product_id' => $lineItem['product_id'],
                         'online_id' => $lineItem['id'],
                         'qte_cmd' => $lineItem['quantity'],
-                        'qte_ordered' => $lineItem['weight_ordered'],
-                        'total' => $lineItem['unit_price'] * $lineItem['quantity'],
-                        'ttc' => $lineItem['unit_price'] * $lineItem['quantity'],
-                        'qte' => $lineItem['quantity'],
+                        'qte_ordered' => $lineItem['quantity'],
+                        'variation_id' => $lineItem['weight_ordered'],
+                        // 'total' => $lineItem['unit_price'] * $lineItem['quantity'],
+                        // 'ttc' => $lineItem['unit_price'] * $lineItem['quantity'],
+                        // 'qte' => $lineItem['quantity'],
                         'ecommerce_id' => $ecommerceId,
+                        // Ajouter le produit ID basé sur $lineItem['product_id'] depuis la table produit 
                     ];
     
                     if ($this->Ecommercedetail->save($ecommerceDetailData)) {
