@@ -4171,6 +4171,7 @@ class PosController extends AppController
         $this->loadModel('Ecommerce'); 
         $this->loadModel('Ecommercedetail'); 
         $this->loadModel('Client');
+        $this->loadModel('Produit');
     
         $this->autoRender = false;
     
@@ -4245,7 +4246,7 @@ class PosController extends AppController
                 'adresse' => $order['customer']['address'],
                 'date' => date('Y-m-d', strtotime($order['date_created'])),
                 'store_id' => 1,
-                'statut' => 'comde_in_progress',
+                'statut' => 'in_progress',
                 'customer_id' => $customerId,
                 'total_qte' => array_sum(array_column($order['line_items'], 'quantity')),
                 'total_a_payer_ttc' => array_sum(array_map(function($item) {
@@ -4260,23 +4261,23 @@ class PosController extends AppController
     
                 foreach ($order['line_items'] as $lineItem) {
                     $this->Ecommercedetail->create();
+                    
+                $productCodeBarreAPI =  $lineItem['product_id'];         
+                $productId = $this->Produit->field('id', ['code_barre' => $productCodeBarreAPI]);
+
                     $ecommerceDetailData = [
                         'unit_price' => $lineItem['unit_price'],
                         'prix_vente' => $lineItem['unit_price'],
-                        // 'product_id' => $lineItem['product_id'],
+                        'produit_id' =>  $productId,
                         'online_id' => $lineItem['id'],
                         'qte_cmd' => $lineItem['quantity'],
                         'qte_ordered' => $lineItem['quantity'],
                         'variation_id' => $lineItem['weight_ordered'],
-                        // 'total' => $lineItem['unit_price'] * $lineItem['quantity'],
-                        // 'ttc' => $lineItem['unit_price'] * $lineItem['quantity'],
-                        // 'qte' => $lineItem['quantity'],
-                        'ecommerce_id' => $ecommerceId,
-                        // Ajouter le produit ID basé sur $lineItem['product_id'] depuis la table produit 
+                        'ecommerce_id' => $ecommerceId,   
                     ];
-    
+
                     if ($this->Ecommercedetail->save($ecommerceDetailData)) {
-                        echo "Détail enregistré pour produit ID: " . $lineItem['product_id'] . "<br>";
+                        echo "Détail enregistré pour Code barre : " . $lineItem['product_id'] . " produit ID: " . $productId . "<br>";
                     } else {
                         echo "Échec d'enregistrement du détail produit: ";
                         debug($this->Ecommercedetail->validationErrors);
@@ -4291,8 +4292,8 @@ class PosController extends AppController
         }
     
         if (!empty($orderIds)) {
-            $this->confirmOrders($orderIds);
-        }
+            //$this->confirmOrders($orderIds);
+        } 
     }
     
     // Fonction pour confirmer les commandes
