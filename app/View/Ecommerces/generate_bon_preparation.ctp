@@ -65,7 +65,7 @@
                     <?php echo h($detail['Ecommercedetail']['qte_cmd']); ?>
                 </td>
                 <td style="border: 1px solid #000; padding: 8px; text-align: center;">
-                    <?php echo h($detail['Ecommercedetail']['qte_ordered']); ?>
+                    <?php echo h($detail['Ecommercedetail']['variation_id']); ?>
                 </td>
             </tr>
         <?php endforeach; ?>
