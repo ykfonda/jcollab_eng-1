@@ -1987,6 +1987,8 @@ class PosController extends AppController
     // Scan ECOME => à verfier --------------------------------
     public function updateline($code_barre = null, $salepoint_id = null)
     {
+
+      
         $response['error'] = true;
         $response['message'] = '';
         $longeur = strlen($code_barre);
@@ -2016,22 +2018,19 @@ class PosController extends AppController
                     $quantite = 1;
                 }
 
-                var_dump($code_article);
-            
+
+        
 
                 $salepoint = $this->Salepoint->find('first', [
                     'conditions' => [
                         'Salepoint.id' => $salepoint_id,
-                        'Salepoint.store' => $this->Session->read('Auth.User.StoreSession.id')
+                        //'Salepoint.store' => $this->Session->read('Auth.User.StoreSession.id')
                     ]
                 ]);
 
                 if (isset($salepoint['Salepoint']['ecommerce_id']) or isset($salepoint['Salepoint']['glovo_id'])) {
 
-
                     // $produit = $this->Produit->find('first', ['fields' => ['id', 'prix_vente', 'pese', 'tva_vente'], 'conditions' => ['Produit.type' => 2, 'Produit.code_barre' => $code_article]]);
-
-
                     
                     // Étape 1 : requête sans prix_vente
                     $produit = $this->Produit->find('first', [
@@ -2119,23 +2118,12 @@ class PosController extends AppController
                             $pese = 0;
                         }
 
-                        /* if(isset($pese)) {
-                            if(strlen((string) $qte) == 2) {
-                                $qte = $qte/10;
-                            }
-                            else if(strlen((string) $qte) == 3) {
-                                $qte = $qte/((int) 100);
-                            }
-                            else if(strlen((string) $qte) == 4) {
-                                $qte = $qte/1000;
-                            }
+                    
 
-                        } */
                         $qte_old = (!empty($produit['Salepointdetail']['qte'])) ? $produit['Salepointdetail']['qte'] : 0;
-                        /* $qte = (int) $quantite;
-                        $qte = $qte/1000; */
 
-                        $qte = $qte_old + $qte;
+                        //$qte = $qte_old + $qte;
+
                         $details_d = $this->Salepoint->Salepointdetail->find('all', ['contain' => ['Produit'], 'conditions' => ['Salepointdetail.salepoint_id' => $salepoint_id,
                                 'Salepointdetail.produit_id' => $produit['Produit']['id'], ]]);
                         if (count($details_d) > 1) {
@@ -2146,6 +2134,12 @@ class PosController extends AppController
                             $response['message'] = 'Opération impossible la quantité doit étre supérieur a zéro !';
                         } else {
                             $qte_cmd = (isset($produit['Salepointdetail']['qte_cmd'])) ? $produit['Salepointdetail']['qte_cmd'] : 0;
+
+                            // var_dump($qte_cmd);
+                            //var_dump($qte);
+                            // die();
+
+
                             if (($qte > $qte_cmd and (isset($commandedetail) == false)) || (isset($produit['Salepoint']['glovo_id']) and (!isset($pass)) and ($qte > $qte_cmd * 1.02)) || (isset($ecommerced) and (!isset($pass)) and ($qte > $qte_cmd))) {
                                 $response['message'] = 'la quantité livrée doit étre inferieure ou égale a la quantité commandée 03 !';
                             } else {
