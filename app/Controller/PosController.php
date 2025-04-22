@@ -1987,8 +1987,6 @@ class PosController extends AppController
     // Scan ECOME => à verfier --------------------------------
     public function updateline($code_barre = null, $salepoint_id = null)
     {
-
-      
         $response['error'] = true;
         $response['message'] = '';
         $longeur = strlen($code_barre);
@@ -2019,8 +2017,6 @@ class PosController extends AppController
                 // }
 
 
-        
-
                 $salepoint = $this->Salepoint->find('first', [
                     'conditions' => [
                         'Salepoint.id' => $salepoint_id,
@@ -2032,9 +2028,9 @@ class PosController extends AppController
 
                     // $produit = $this->Produit->find('first', ['fields' => ['id', 'prix_vente', 'pese', 'tva_vente'], 'conditions' => ['Produit.type' => 2, 'Produit.code_barre' => $code_article]]);
                     
-                    // Étape 1 : requête sans prix_vente
+                    // Étape 1 : 
                     $produit = $this->Produit->find('first', [
-                        'fields' => ['id', 'pese', 'tva_vente'],
+                        'fields' => ['id', 'pese'],
                         'conditions' => [
                             'Produit.type' => 2,
                             'Produit.code_barre' => $code_article
@@ -2042,7 +2038,6 @@ class PosController extends AppController
                     ]);
 
                     // Étape 2 : récupérer prix_vente depuis EAN13
-
                     $code_ean13 = $code_barre;
                     $details = $this->getEan13Details($code_ean13);
                     $nom_produit_EAN13 = $details['nom_produit'];
