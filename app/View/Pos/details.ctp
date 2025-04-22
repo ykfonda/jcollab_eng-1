@@ -22,7 +22,7 @@
         <?php foreach ($details as $k => $v): ?>
           <?php $total_livree = $v['Salepointdetail']['qte'] * $v['Salepointdetail']['prix_vente']; ?>
           <tr class="rowParent">
-            <td nowrap="" style="width: 35%;"><?php echo $this->Text->truncate($v['Produit']['libelle'], 30); ?></td>
+            <td nowrap="" style="width: 35%; color: blue !important;"><?php echo $this->Text->truncate($v['Produit']['libelle'], 30); ?></td>
             <td nowrap="" class="text-right" style="width: 15%;"><?php echo number_format($v['Salepointdetail']['qte'], 3, ',', ' '); ?></td>
             <td nowrap="" class="text-right" style="width: 15%;"><?php echo number_format($v['Salepointdetail']['qte_cmd'], 3, ',', ' '); ?></td>
               <?php if (!empty($this->data['Salepoint']['ecommerce_id'])) : ?>
@@ -38,7 +38,18 @@
                 <?php echo number_format($v['Salepointdetail']['remise'], 2, ',', ' '); ?>%</span>
               <?php endif; ?>
             </td>
-            <td nowrap="" class="text-right" style="width: 15%;"><?php echo number_format($v['Salepointdetail']['ttc'], 2, ',', ' '); ?></td>
+            
+            
+            <td nowrap="" class="text-right" style="width: 15%;">
+              <?php // echo number_format($v['Salepointdetail']['ttc'], 2, ',', ' '); 
+                  echo number_format($v['Salepointdetail']['unit_price'] * $v['Salepointdetail']['qte'], 2, ',', ' ');
+              ?>
+            
+            </td>
+
+            
+
+
             <td nowrap="" style="width: 5%;">
               <?php if (!empty($this->data['Salepoint']['commande_id']) or !empty($this->data['Salepoint']['ecommerce_id']) or !empty($this->data['Salepoint']['glovo_id'])): ?>
                 <a href="<?php echo $this->Html->url(['controller' => 'pos', 'action' => 'cancelline', $v['Salepointdetail']['id'], $v['Salepointdetail']['salepoint_id']]); ?>" class="btn btn-danger btn-xs btn-circle btn-delete"><i class="fa fa-ban"></i> Annuler</a>
