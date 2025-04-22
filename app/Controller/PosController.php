@@ -1882,13 +1882,25 @@ class PosController extends AppController
             $cb_div_kg = (isset($params['cb_div_kg']) and !empty($params['cb_div_kg']) and $params['cb_div_kg'] > 0) ? (int) $params['cb_div_kg'] : 1000;
             $identifiant = substr(trim($code_barre), 0, 4);
 
-            if ($cb_identifiant != $identifiant) {
-                $response['message'] = "Identifiant du code à barre est incorrect , veuillez vérifier votre paramétrage d'application !";
+
+            $code_ean13 = $code_barre;
+            $produit = $this->getEan13Details($code_ean13);
+            if (!empty($produit)) {
+                $code_article = $produit['code_barre'];
             } else {
+                echo 'Produit non trouvé';
+            }
+            $quantite = 0; // 0 pour faire un teste
 
 
-                $code_article = substr(trim($code_barre), $cb_produit_depart, $cb_produit_longeur);
-                $quantite = substr(trim($code_barre), $cb_quantite_depart, $cb_quantite_longeur);
+
+           
+
+      
+            //    $response['message'] = "Identifiant du code à barre est incorrect , veuillez vérifier votre paramétrage d'application !";
+
+                // $code_article = substr(trim($code_barre), $cb_produit_depart, $cb_produit_longeur);
+                // $quantite = substr(trim($code_barre), $cb_quantite_depart, $cb_quantite_longeur);
 
                 if (!empty($code_article)) {
                     $produit = $this->Salepoint->Salepointdetail->find('first', [
@@ -1908,24 +1920,11 @@ class PosController extends AppController
                             $qte = (int) $quantite;
                             $pese = 0;
                         }
-
-                        /* if(isset($pese)) {
-                            if(strlen((string) $qte) == 2) {
-                                $qte = $qte/10;
-                            }
-                            else if(strlen((string) $qte) == 3) {
-                                $qte = $qte/((int) 100);
-                            }
-                            else if(strlen((string) $qte) == 4) {
-                                $qte = $qte/1000;
-                            }
-
-                        } */
                         $qte_old = (!empty($produit['Salepointdetail']['qte'])) ? $produit['Salepointdetail']['qte'] : 0;
-                        /* $qte = (int) $quantite;
-                        $qte = $qte/1000; */
+
 
                         $qte = $qte_old + $qte;
+
 
                         if ($qte <= 0) {
                             $response['message'] = 'Opération impossible la quantité doit étre supérieur a zéro !';
@@ -1950,8 +1949,7 @@ class PosController extends AppController
                                 ]);
 
                                 /* $prix_vente_ht = round( $ecommerce_d["Ecommercedetail"]["prix_vente"]/$division_tva,2 );
-                                $prix_vente_ttc = $ecommerce_d["Ecommercedetail"]["prix_vente"];
- */
+                                $prix_vente_ttc = $ecommerce_d["Ecommercedetail"]["prix_vente"];*/
                                 $total_ht = round($ecommerce_d[0]['Ecommercedetail']['prix_vente'] * $qte / $division_tva, 2);
                                 $total_ttc = round($ecommerce_d[0]['Ecommercedetail']['prix_vente'] * $qte, 2);
 
@@ -1975,7 +1973,7 @@ class PosController extends AppController
                 } else {
                     $response['message'] = 'Code a barre incorrect ou vide !';
                 }
-            }
+            
         }
         if ($this->notice == 1) {
             $response['notice'] = true;
@@ -2016,7 +2014,6 @@ class PosController extends AppController
                     $quantite = 1;
                 // }
 
-
                 $salepoint = $this->Salepoint->find('first', [
                     'conditions' => [
                         'Salepoint.id' => $salepoint_id,
@@ -2037,7 +2034,7 @@ class PosController extends AppController
                         ]
                     ]);
 
-                    // Étape 2 : récupérer prix_vente depuis EAN13
+                    // Étape 2 : récupérer nom_produit_EAN13 depuis EAN13
                     $code_ean13 = $code_barre;
                     $details = $this->getEan13Details($code_ean13);
                     $nom_produit_EAN13 = $details['nom_produit'];
