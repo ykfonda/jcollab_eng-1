@@ -869,7 +869,7 @@ class PosController extends AppController
         
 
         // La liste des statuts de commande à afficher dans le POS
-        $conditions['Ecommerce.statut'] = ['pending', 'confirmed', 'in_preparation', 'ready_for_delivery','comde_in_progress'];
+        $conditions['Ecommerce.statut'] = ['pending', 'confirmed', 'in_preparation', 'ready_for_delivery','in_progress'];
         $conditions['Ecommerce.etat'] = -1;
         $conditions['Ecommerce.deleted'] = 0;
         $conditions['Ecommerce.store_id'] = $this->Session->read('Auth.User.StoreSession.id');
