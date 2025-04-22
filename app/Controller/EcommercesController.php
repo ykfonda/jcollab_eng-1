@@ -1079,7 +1079,7 @@ $this->set('id', 9);
         
         foreach ($details as &$detail) {
             $produit = $this->Produit->find('first', [
-                'conditions' => ['Produit.code_barre' => $detail['Ecommercedetail']['produit_id']], // produit_id est en réalité code_barre
+                'conditions' => ['Produit.id' => $detail['Ecommercedetail']['produit_id']], // produit_id est en réalité code_barre
                 'fields' => ['libelle'],
                 'recursive' => -1
             ]);
