@@ -2007,7 +2007,7 @@ class PosController extends AppController
                 // $code_article = substr(trim($code_barre), $cb_produit_depart, $cb_produit_longeur);
                 // $quantite = substr(trim($code_barre), $cb_quantite_depart, $cb_quantite_longeur);
 
-                if ($identifiant != 2900) {                    
+                // if ($identifiant != 2900) {                    
                          $code_ean13 = $code_barre;
                          $produit = $this->getEan13Details($code_ean13);
                          if (!empty($produit)) {
@@ -2016,7 +2016,7 @@ class PosController extends AppController
                              echo 'Produit non trouvé';
                          }
                     $quantite = 1;
-                }
+                // }
 
 
         
@@ -2122,7 +2122,7 @@ class PosController extends AppController
 
                         $qte_old = (!empty($produit['Salepointdetail']['qte'])) ? $produit['Salepointdetail']['qte'] : 0;
 
-                        //$qte = $qte_old + $qte;
+                        $qte = $qte_old + $qte;
 
                         $details_d = $this->Salepoint->Salepointdetail->find('all', ['contain' => ['Produit'], 'conditions' => ['Salepointdetail.salepoint_id' => $salepoint_id,
                                 'Salepointdetail.produit_id' => $produit['Produit']['id'], ]]);
