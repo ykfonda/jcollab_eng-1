@@ -496,8 +496,6 @@ class PosController extends AppController
             $Ecommerces->constructClasses(); // charge les modèles
             $Ecommerces->changeStatus($ecommerce_id, 'in_preparation');
 
-            
-
             $this->calcule($salepoint_id);
             $this->Session->setFlash('L\'action a été effectué avec succès.', 'alert-success');
         } else {
@@ -2887,7 +2885,7 @@ $data['Salepointdetail']['ttc'] = $ttc_calculated;
         $reste_a_payer = ($reste_a_payer <= 0) ? 0 : $reste_a_payer;
 
         ///add
-        $total_paye -= $salepoint['Salepoint']['fee'];
+        // $total_paye -= $salepoint['Salepoint']['fee'];
 
         if (bccomp($total_apres_reduction, $total_paye, 3) == 0) {
             $paye = 2;
