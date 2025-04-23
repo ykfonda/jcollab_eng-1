@@ -26,7 +26,13 @@
             <td nowrap="" class="text-right" style="width: 15%;"><?php echo number_format($v['Salepointdetail']['qte'], 3, ',', ' '); ?></td>
             <td nowrap="" class="text-right" style="width: 15%;"><?php echo number_format($v['Salepointdetail']['qte_cmd'], 3, ',', ' '); ?></td>
               <?php if (!empty($this->data['Salepoint']['ecommerce_id'])) : ?>
-                <td nowrap="" class="text-right" style="width: 15%;"><?php echo number_format($v['Salepointdetail']['unit_price'], 2, ',', ' '); ?></td>
+
+                <td nowrap="" class="text-right" style="width: 15%;">
+                  
+                <?php echo number_format($v['Salepointdetail']['unit_price'], 2, ',', ' '); ?>
+              
+              </td>
+
               <?php else: ?>
                 <td nowrap="" class="text-right" style="width: 15%;"><?php echo number_format($v['Salepointdetail']['prix_vente'], 2, ',', ' '); ?></td>
               <?php endif; ?>

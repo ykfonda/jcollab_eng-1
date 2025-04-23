@@ -1952,10 +1952,22 @@ class PosController extends AppController
                                 $total_ht = round($ecommerce_d[0]['Ecommercedetail']['prix_vente'] * $qte / $division_tva, 2);
                                 $total_ttc = round($ecommerce_d[0]['Ecommercedetail']['prix_vente'] * $qte, 2);
 
-                                $data['Salepointdetail']['id'] = $produit['Salepointdetail']['id'];
-                                $data['Salepointdetail']['total'] = $total_ht;
-                                $data['Salepointdetail']['ttc'] = $total_ttc;
-                                $data['Salepointdetail']['qte'] = $qte;
+
+$prix_vente_ttc = $ecommerce_d[0]['Ecommercedetail']['prix_vente'];
+$ttc_calculated = round($prix_vente_ttc * $qte, 2);
+$ht_calculated  = round($prix_vente_ttc * $qte / $division_tva, 2);
+
+$data['Salepointdetail']['id'] = $produit['Salepointdetail']['id'];
+$data['Salepointdetail']['qte'] = $qte;
+$data['Salepointdetail']['total'] = $ht_calculated;
+$data['Salepointdetail']['ttc'] = $ttc_calculated;
+
+                                //$data['Salepointdetail']['id'] = $produit['Salepointdetail']['id'];
+                                //$data['Salepointdetail']['total'] = $total_ht;
+                                //$data['Salepointdetail']['ttc'] = $total_ttc;
+                                //$data['Salepointdetail']['qte'] = $qte;
+
+                                // var_dump($data);die();
 
                                 if ($this->Salepoint->Salepointdetail->save($data)) {
                                     $this->calcule($salepoint_id);
