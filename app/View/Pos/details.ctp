@@ -60,8 +60,13 @@
             
             <td nowrap="" class="text-right" style="width: 15%;">
               <?php
-                echo number_format($v['Salepointdetail']['ttc'], 2, ',', ' '); 
-                  // echo number_format($v['Salepointdetail']['unit_price'] * $v['Salepointdetail']['qte'], 2, ',', ' ');
+                
+                  if (!empty($this->data['Salepoint']['ecommerce_id'])) {
+                    echo number_format($v['Salepointdetail']['unit_price'] * $v['Salepointdetail']['qte'], 2, ',', ' ');
+                  } else {
+                    echo number_format($v['Salepointdetail']['ttc'], 2, ',', ' '); 
+                  }
+  
               ?>
             </td>
 
