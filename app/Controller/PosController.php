@@ -2014,7 +2014,7 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
 
     public function updateline($code_barre = null, $salepoint_id = null)
     {
-        
+
         $response['error'] = true;
         $response['message'] = '';
         $longeur = strlen($code_barre);
@@ -2052,15 +2052,9 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
             $quantite     = 1;
 
             // If code_article innexistant il faut afficher message d'erreur
-            if (empty($code_article)) {
+            if (    empty($code_article)) {
                 $response['message'] = 'Code a barre innexistant !';
             }
-
-
-
-
-
-
 
                 $salepoint = $this->Salepoint->find('first', ['conditions' => ['Salepoint.id' => $salepoint_id]]);
                 if (isset($salepoint['Salepoint']['ecommerce_id']) or isset($salepoint['Salepoint']['glovo_id'])) {
@@ -2231,6 +2225,7 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
                                     $data['Salepointdetail']['remise'] = 0;
                                     $data['Salepointdetail']['onhold'] = -1;
                                     $data['Salepointdetail']['stat'] = -1;
+                                    $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom produit de la table EAN13 vers salespointdetail
                                 }
                                 if (isset($produit['Salepoint']['glovo_id'])) {
                                     $data['Salepointdetail']['prix_vente'] = $produit['Salepointdetail']['prix_vente'];
