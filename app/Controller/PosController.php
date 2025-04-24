@@ -1880,15 +1880,18 @@ class PosController extends AppController
             $cb_div_kg = (isset($params['cb_div_kg']) and !empty($params['cb_div_kg']) and $params['cb_div_kg'] > 0) ? (int) $params['cb_div_kg'] : 1000;
             $identifiant = substr(trim($code_barre), 0, 4);
 
-
             if ($cb_identifiant != $identifiant) {
                 // Go to EAN13 Table
                 $produit = $this->Produit->find('first', [
-                    'fields' => ['Produit.id', 'Ean13Code.variante', 'Ean13Code.code_barre'],
+                    'fields' => [
+                        'Produit.id',
+                        'Ean13Code.variante',
+                        'Ean13Code.code_barre',
+                        'Ean13Code.nom_produit' // ✅ Nom du produit depuis ean13_codes
+                    ],
                     'conditions' => [
                         'Produit.type' => 2,
                         'Ean13Code.code_ean13' => $code_barre,
-                        'Ean13Code.nom_produit'  // ✅ Ajout ici
                     ],
                     'joins' => [
                         [
@@ -1899,22 +1902,15 @@ class PosController extends AppController
                         ]
                     ]
                 ]);
-                
-                
+            
                 $code_article = $produit['Ean13Code']['code_barre'];
-                $nom_produit_ean13  = $produit['Ean13Code']['nom_produit']; 
-                $quantite = 1;
-            } 
-            else {
+                $nom_produit_ean13  = $produit['Ean13Code']['nom_produit']; // ✅ Utilisation
+                $quantite     = 1;
+            } else {
                 $code_article = substr(trim($code_barre), $cb_produit_depart, $cb_produit_longeur);
-                $quantite = substr(trim($code_barre), $cb_quantite_depart, $cb_quantite_longeur);
+                $quantite     = substr(trim($code_barre), $cb_quantite_depart, $cb_quantite_longeur);
             }
-
-
-
-            var_dump($code_article);die();
-
-
+            
                 if (!empty($code_article)) {
                     $produit = $this->Salepoint->Salepointdetail->find('first', [
                         'conditions' => [
@@ -1989,6 +1985,7 @@ $data['Salepointdetail']['id'] = $produit['Salepointdetail']['id'];
 $data['Salepointdetail']['qte'] = $qte;
 $data['Salepointdetail']['total'] = $ht_calculated;
 $data['Salepointdetail']['ttc'] = $ttc_calculated;
+$data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom produit de la table EAN13 vers salespointdetail
 
                                 //$data['Salepointdetail']['id'] = $produit['Salepointdetail']['id'];
                                 //$data['Salepointdetail']['total'] = $total_ht;
