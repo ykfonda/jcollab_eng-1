@@ -2634,39 +2634,18 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
         } else {
 
             $params = $this->Parametreste->findList();
-            $cb_identifiant = (isset($params['cb_identifiant']) and !empty($params['cb_identifiant'])) ? $params['cb_identifiant'] : '2900';
-            $cb_produit_depart = (isset($params['cb_produit_depart']) and !empty($params['cb_produit_depart'])) ? $params['cb_produit_depart'] : 4;
-            $cb_produit_longeur = (isset($params['cb_produit_longeur']) and !empty($params['cb_produit_longeur'])) ? $params['cb_produit_longeur'] : 3;
-            $cb_quantite_depart = (isset($params['cb_quantite_depart']) and !empty($params['cb_quantite_depart'])) ? $params['cb_quantite_depart'] : 7;
-            $cb_quantite_longeur = (isset($params['cb_quantite_longeur']) and !empty($params['cb_quantite_longeur'])) ? $params['cb_quantite_longeur'] : 5;
             $cb_div_kg = (isset($params['cb_div_kg']) and !empty($params['cb_div_kg']) and $params['cb_div_kg'] > 0) ? (int) $params['cb_div_kg'] : 1000;
 
-            $identifiant = substr(trim($code_barre), 0, 4);
-               
-                if ($identifiant != 2900) {                    
-                    // Old script 
-                        // $produit = $this->Produit->find('first', ['fields' => ['id','code_barre'], 'conditions' => ['Produit.type' => 2, 'Produit.ean13' => $code_barre]]);
-                         //$code_article = $produit['Produit']['code_barre'];
+                $code_ean13 = $code_barre;
+                $produit = $this->getEan13Details($code_ean13);
 
-
-                         $code_ean13 = $code_barre;
-                         $produit = $this->getEan13Details($code_ean13);
- 
-                         if (!empty($produit)) {
-                             $code_article = $produit['code_barre'];
-                         } else {
-                             echo 'Produit non trouvé';
-                         }
-
-                    $quantite = 1;
+                if (!empty($produit)) {
+                $code_article = $produit['code_barre'];
+                } else {
+                echo 'Produit non trouvé';
                 }
+                $quantite = 1;
 
-
-                if (!isset($code_article) && (empty($code_article))) {
-                    $code_article = substr(trim($code_barre), $cb_produit_depart, $cb_produit_longeur);
-                    // $quantite = substr(trim($code_barre), $cb_quantite_depart, $cb_quantite_longeur);
-                    $quantite = 1;
-                }
 
                 if (!empty($code_article)) {
 
@@ -2687,11 +2666,16 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
                     $code_ean13 = $code_barre;
                     $details = $this->getEan13Details($code_ean13);
 
-                   
+                    // Vérification de l'existence de nom_produit
+                    if (!empty($details['nom_produit'])) {
+                        $produit_nom_ean13 = $details['nom_produit'];
+                    }
+
                     // Étape 3 : injecter prix_vente dans le même tableau
                     if (!empty($details['prix_vente'])) {
                         $produit['Produit']['prix_vente'] = $details['prix_vente'];
                     }
+
                     // Vérification de l'existence de prix_vente
                     if (empty($details['prix_vente'])) {
                         $this->Session->setFlash('Le prix de vente est introuvable pour ce produit.', 'alert-danger');
@@ -2744,6 +2728,10 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
                             $data['Salepointdetail']['remise'] = 0;
                             $data['Salepointdetail']['onhold'] = -1;
                             $data['Salepointdetail']['stat'] = -1;
+
+                            if (!empty($details['nom_produit'])) {
+                                 $data['Salepointdetail']['nom_produit_ean13'] = $produit_nom_ean13;
+                            }
 
                             //add remise
                             $salepoint = $this->Salepoint->find('first', ['conditions' => ['Salepoint.id' => $salepoint_id]]);
