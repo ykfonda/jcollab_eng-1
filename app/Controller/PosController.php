@@ -1871,46 +1871,41 @@ class PosController extends AppController
         if ($longeur != 13) {
             $response['message'] = 'Code a barre est incorrect , produit introuvable !';
         } else {
-            $params = $this->Parametreste->findList();
-            $cb_identifiant = (isset($params['cb_identifiant']) and !empty($params['cb_identifiant'])) ? $params['cb_identifiant'] : '2900';
-            $cb_produit_depart = (isset($params['cb_produit_depart']) and !empty($params['cb_produit_depart'])) ? $params['cb_produit_depart'] : 4;
-            $cb_produit_longeur = (isset($params['cb_produit_longeur']) and !empty($params['cb_produit_longeur'])) ? $params['cb_produit_longeur'] : 3;
-            $cb_quantite_depart = (isset($params['cb_quantite_depart']) and !empty($params['cb_quantite_depart'])) ? $params['cb_quantite_depart'] : 7;
-            $cb_quantite_longeur = (isset($params['cb_quantite_longeur']) and !empty($params['cb_quantite_longeur'])) ? $params['cb_quantite_longeur'] : 5;
-            $cb_div_kg = (isset($params['cb_div_kg']) and !empty($params['cb_div_kg']) and $params['cb_div_kg'] > 0) ? (int) $params['cb_div_kg'] : 1000;
-            $identifiant = substr(trim($code_barre), 0, 4);
 
-            if ($cb_identifiant != $identifiant) {
-                // Go to EAN13 Table
-                $produit = $this->Produit->find('first', [
-                    'fields' => [
-                        'Produit.id',
-                        'Ean13Code.variante',
-                        'Ean13Code.code_barre',
-                        'Ean13Code.nom_produit' // ✅ Nom du produit depuis ean13_codes
-                    ],
-                    'conditions' => [
-                        'Produit.type' => 2,
-                        'Ean13Code.code_ean13' => $code_barre,
-                    ],
-                    'joins' => [
-                        [
-                            'table' => 'ean13_codes',
-                            'alias' => 'Ean13Code',
-                            'type' => 'INNER',
-                            'conditions' => ['Ean13Code.produit_id = Produit.id']
-                        ]
+            $params = $this->Parametreste->findList();
+            $cb_div_kg = (isset($params['cb_div_kg']) and !empty($params['cb_div_kg']) and $params['cb_div_kg'] > 0) ? (int) $params['cb_div_kg'] : 1000;
+
+            // Go to EAN13 Table
+            $produit = $this->Produit->find('first', [
+                'fields' => [
+                    'Produit.id',
+                    'Ean13Code.variante',
+                    'Ean13Code.code_barre',
+                    'Ean13Code.nom_produit' // ✅ Nom du produit depuis ean13_codes
+                ],
+                'conditions' => [
+                    'Produit.type' => 2,
+                    'Ean13Code.code_ean13' => $code_barre,
+                ],
+                'joins' => [
+                    [
+                        'table' => 'ean13_codes',
+                        'alias' => 'Ean13Code',
+                        'type' => 'INNER',
+                        'conditions' => ['Ean13Code.produit_id = Produit.id']
                     ]
-                ]);
-            
-                $code_article = $produit['Ean13Code']['code_barre'];
-                $nom_produit_ean13  = $produit['Ean13Code']['nom_produit']; // ✅ Utilisation
-                $quantite     = 1;
-            } else {
-                $code_article = substr(trim($code_barre), $cb_produit_depart, $cb_produit_longeur);
-                $quantite     = substr(trim($code_barre), $cb_quantite_depart, $cb_quantite_longeur);
+                ]
+            ]);
+        
+            $code_article = $produit['Ean13Code']['code_barre'];
+            $nom_produit_ean13  = $produit['Ean13Code']['nom_produit']; // ✅ Utilisation
+            $quantite     = 1;
+
+            // If code_article innexistant il faut afficher message d'erreur
+            if (empty($code_article)) {
+                $response['message'] = 'Code a barre innexistant !';
             }
-            
+          
                 if (!empty($code_article)) {
                     $produit = $this->Salepoint->Salepointdetail->find('first', [
                         'conditions' => [
@@ -2019,25 +2014,53 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
 
     public function updateline($code_barre = null, $salepoint_id = null)
     {
+        
         $response['error'] = true;
         $response['message'] = '';
         $longeur = strlen($code_barre);
         if ($longeur != 13) {
             $response['message'] = 'Code a barre est incorrect , produit introuvable !';
         } else {
+
             $params = $this->Parametreste->findList();
-            $cb_identifiant = (isset($params['cb_identifiant']) and !empty($params['cb_identifiant'])) ? $params['cb_identifiant'] : '2900';
-            $cb_produit_depart = (isset($params['cb_produit_depart']) and !empty($params['cb_produit_depart'])) ? $params['cb_produit_depart'] : 4;
-            $cb_produit_longeur = (isset($params['cb_produit_longeur']) and !empty($params['cb_produit_longeur'])) ? $params['cb_produit_longeur'] : 3;
-            $cb_quantite_depart = (isset($params['cb_quantite_depart']) and !empty($params['cb_quantite_depart'])) ? $params['cb_quantite_depart'] : 7;
-            $cb_quantite_longeur = (isset($params['cb_quantite_longeur']) and !empty($params['cb_quantite_longeur'])) ? $params['cb_quantite_longeur'] : 5;
             $cb_div_kg = (isset($params['cb_div_kg']) and !empty($params['cb_div_kg']) and $params['cb_div_kg'] > 0) ? (int) $params['cb_div_kg'] : 1000;
-            $identifiant = substr(trim($code_barre), 0, 4);
-            if ($cb_identifiant != $identifiant) {
-                $response['message'] = "Identifiant du code à barre est incorrect , veuillez vérifier votre paramétrage d'application !";
-            } else {
-                $code_article = substr(trim($code_barre), $cb_produit_depart, $cb_produit_longeur);
-                $quantite = substr(trim($code_barre), $cb_quantite_depart, $cb_quantite_longeur);
+
+            // Go to EAN13 Table
+            $produit = $this->Produit->find('first', [
+                'fields' => [
+                    'Produit.id',
+                    'Ean13Code.variante',
+                    'Ean13Code.code_barre',
+                    'Ean13Code.nom_produit' // ✅ Nom du produit depuis ean13_codes
+                ],
+                'conditions' => [
+                    'Produit.type' => 2,
+                    'Ean13Code.code_ean13' => $code_barre,
+                ],
+                'joins' => [
+                    [
+                        'table' => 'ean13_codes',
+                        'alias' => 'Ean13Code',
+                        'type' => 'INNER',
+                        'conditions' => ['Ean13Code.produit_id = Produit.id']
+                    ]
+                ]
+            ]);
+        
+            $code_article = $produit['Ean13Code']['code_barre'];
+            $nom_produit_ean13  = $produit['Ean13Code']['nom_produit']; // ✅ Utilisation
+            $quantite     = 1;
+
+            // If code_article innexistant il faut afficher message d'erreur
+            if (empty($code_article)) {
+                $response['message'] = 'Code a barre innexistant !';
+            }
+
+
+
+
+
+
 
                 $salepoint = $this->Salepoint->find('first', ['conditions' => ['Salepoint.id' => $salepoint_id]]);
                 if (isset($salepoint['Salepoint']['ecommerce_id']) or isset($salepoint['Salepoint']['glovo_id'])) {
@@ -2337,7 +2360,6 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
                 } else {
                     $response['message'] = 'Code a barre incorrect ou vide !';
                 }
-            }
         }
         if ($this->notice == 1) {
             $response['notice'] = true;
