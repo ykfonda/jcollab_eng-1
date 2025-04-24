@@ -1,0 +1,2 @@
+ALTER TABLE `salepointdetails`
+	ADD COLUMN `nom_produit_ean13` VARCHAR(255) NULL DEFAULT NULL AFTER `glovodetail_id`;
