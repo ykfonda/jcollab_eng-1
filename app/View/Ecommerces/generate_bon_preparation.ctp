@@ -33,11 +33,13 @@
     <tr>
         <th style="text-align: center; border: 1px solid #000; padding: 8px;">Référence JCOLLAB</th>
         <th style="text-align: center; border: 1px solid #000; padding: 8px;">Référence ECOM</th>
+        <th style="text-align: center; border: 1px solid #000; padding: 8px;">Client</th>       
         <th style="text-align: center; border: 1px solid #000; padding: 8px;">Méthode de livraison</th>
     </tr>
     <tr>
         <td style="text-align: center; border: 1px solid #000; padding: 8px;"><?php echo h($data['Ecommerce']['reference']); ?></td>
         <td style="text-align: center; border: 1px solid #000; padding: 8px;"><?php echo h($data['Ecommerce']['barcode']); ?></td>
+        <td style="text-align: center; border: 1px solid #000; padding: 8px;"><?php echo h($data['Client']['designation']); ?></td>
         <td style="text-align: center; border: 1px solid #000; padding: 8px;"><?php echo h($data['Ecommerce']['shipment']); ?></td>
     </tr>
 </table>

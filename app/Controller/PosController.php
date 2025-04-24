@@ -4214,7 +4214,7 @@ $data['Salepointdetail']['ttc'] = $ttc_calculated;
                 'date' => date('Y-m-d', strtotime($order['date_created'])),
                 'store_id' => 1,
                 'statut' => 'in_progress',
-                'customer_id' => $customerId,
+                'client_id' => $customerId,
                 'total_qte' => array_sum(array_column($order['line_items'], 'quantity')),
                 'total_a_payer_ttc' => array_sum(array_map(function($item) {
                     return isset($item['unit_price']) ? $item['unit_price'] * $item['quantity'] : 0;

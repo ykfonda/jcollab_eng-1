@@ -1055,7 +1055,7 @@ $this->set('id', 9);
 
 
 
-        public function generateBonPreparation($id = null)
+    public function generateBonPreparation($id = null)
     {
         $this->layout = null; // Pas de layout global
         $this->autoRender = false;
@@ -1069,6 +1069,17 @@ $this->set('id', 9);
             'conditions' => ['Ecommerce.id' => $id],
             'contain' => [],
         ]);
+
+        // Récupération des informations du client
+        $this->loadModel('Client');
+
+        $client = $this->Client->find('first', [
+            'conditions' => ['Client.id' => $data['Ecommerce']['client_id']],
+            'fields' => ['designation'],
+            'recursive' => -1
+        ]);
+
+        $data['Client']['designation'] = !empty($client['Client']['designation']) ? $client['Client']['designation'] : '<i>Client introuvable</i>';
 
         $details = $this->Ecommerce->Ecommercedetail->find('all', [
             'conditions' => ['Ecommercedetail.ecommerce_id' => $id],
