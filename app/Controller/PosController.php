@@ -1879,11 +1879,41 @@ class PosController extends AppController
             $cb_quantite_longeur = (isset($params['cb_quantite_longeur']) and !empty($params['cb_quantite_longeur'])) ? $params['cb_quantite_longeur'] : 5;
             $cb_div_kg = (isset($params['cb_div_kg']) and !empty($params['cb_div_kg']) and $params['cb_div_kg'] > 0) ? (int) $params['cb_div_kg'] : 1000;
             $identifiant = substr(trim($code_barre), 0, 4);
+
+
             if ($cb_identifiant != $identifiant) {
-                $response['message'] = "Identifiant du code à barre est incorrect , veuillez vérifier votre paramétrage d'application !";
-            } else {
+                // Go to EAN13 Table
+                $produit = $this->Produit->find('first', [
+                    'fields' => ['Produit.id', 'Ean13Code.variante', 'Ean13Code.code_barre'],
+                    'conditions' => [
+                        'Produit.type' => 2,
+                        'Ean13Code.code_ean13' => $code_barre,
+                        'Ean13Code.nom_produit'  // ✅ Ajout ici
+                    ],
+                    'joins' => [
+                        [
+                            'table' => 'ean13_codes',
+                            'alias' => 'Ean13Code',
+                            'type' => 'INNER',
+                            'conditions' => ['Ean13Code.produit_id = Produit.id']
+                        ]
+                    ]
+                ]);
+                
+                
+                $code_article = $produit['Ean13Code']['code_barre'];
+                $nom_produit_ean13  = $produit['Ean13Code']['nom_produit']; 
+                $quantite = 1;
+            } 
+            else {
                 $code_article = substr(trim($code_barre), $cb_produit_depart, $cb_produit_longeur);
                 $quantite = substr(trim($code_barre), $cb_quantite_depart, $cb_quantite_longeur);
+            }
+
+
+
+            var_dump($code_article);die();
+
 
                 if (!empty($code_article)) {
                     $produit = $this->Salepoint->Salepointdetail->find('first', [
@@ -1982,7 +2012,6 @@ $data['Salepointdetail']['ttc'] = $ttc_calculated;
                 } else {
                     $response['message'] = 'Code a barre incorrect ou vide !';
                 }
-            }
         }
         if ($this->notice == 1) {
             $response['notice'] = true;
