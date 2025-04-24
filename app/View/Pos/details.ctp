@@ -35,17 +35,19 @@
 
             <td nowrap="" class="text-right" style="width: 15%;"><?php echo number_format($v['Salepointdetail']['qte'], 3, ',', ' '); ?></td>
             <td nowrap="" class="text-right" style="width: 15%;"><?php echo number_format($v['Salepointdetail']['qte_cmd'], 3, ',', ' '); ?></td>
-              <?php if (!empty($this->data['Salepoint']['ecommerce_id'])) : ?>
 
-                <td nowrap="" class="text-right" style="width: 15%;">
-                  
+              <?php if (!empty($this->data['Salepoint']['ecommerce_id'])) : ?>
+              <td nowrap="" class="text-right" style="width: 15%;">
                 <?php echo number_format($v['Salepointdetail']['unit_price'], 2, ',', ' '); ?>
-              
               </td>
 
               <?php else: ?>
-                <td nowrap="" class="text-right" style="width: 15%;"><?php echo number_format($v['Salepointdetail']['prix_vente'], 2, ',', ' '); ?></td>
+                <td nowrap="" class="text-right" style="width: 15%;">
+                  <?php echo number_format($v['Salepointdetail']['prix_vente'], 2, ',', ' '); ?>
+                </td>
               <?php endif; ?>
+
+
             <td nowrap="" style="width: 15%;text-align: left;">
               <?php if (!empty($this->data['Salepoint']['commande_id']) or !empty($this->data['Salepoint']['ecommerce_id']) or !empty($this->data['Salepoint']['glovo_id'])): ?>
                 <?php echo number_format($v['Salepointdetail']['remise'], 2, ',', ' '); ?>%</span>
@@ -57,10 +59,10 @@
             
             
             <td nowrap="" class="text-right" style="width: 15%;">
-              <?php // echo number_format($v['Salepointdetail']['ttc'], 2, ',', ' '); 
-                  echo number_format($v['Salepointdetail']['unit_price'] * $v['Salepointdetail']['qte'], 2, ',', ' ');
+              <?php
+                echo number_format($v['Salepointdetail']['ttc'], 2, ',', ' '); 
+                  // echo number_format($v['Salepointdetail']['unit_price'] * $v['Salepointdetail']['qte'], 2, ',', ' ');
               ?>
-            
             </td>
 
             
