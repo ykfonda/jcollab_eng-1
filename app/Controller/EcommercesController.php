@@ -1112,7 +1112,7 @@ $this->set('id', 9);
         $dompdf->load_html($html);
         $dompdf->set_paper('A4', 'portrait');
         $dompdf->render();
-        $dompdf->stream("Bon_preparation_{$id}.pdf", ['Attachment' => false]);
+        $dompdf->stream("Bon_preparation_{$data['Ecommerce']['barcode']}.pdf", ['Attachment' => false]);
     }
 
 
