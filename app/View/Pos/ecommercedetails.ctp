@@ -77,8 +77,8 @@
         <?php $total_unitaire = $v['Ecommercedetail']['qte_ordered']*$v['Ecommercedetail']['prix_vente']; ?>
         <?php $montant_total = $montant_total+$total_unitaire; ?>
         <tr class="rowParent">
-          <td nowrap="" style="width: 35%;"><?php echo $this->Text->truncate($v['Produit']['libelle'],25) ?></td>
-          <td nowrap="" style="width: 35%;"><?php echo $this->Text->truncate($v['Ecommercedetail']['variation_id'],25) ?></td>
+          <td nowrap="" style="width: 45%;"><?php echo $this->Text->truncate($v['Produit']['libelle'],45) ?></td>
+          <td nowrap="" style="width: 12%;"><?php echo $this->Text->truncate($v['Ecommercedetail']['variation_id'],25) ?></td>
           <td nowrap="" class="text-right" style="width: 10%;"><?php echo number_format($v['Ecommercedetail']['qte_ordered'], 2, ',', ' ') ?></td>
           <td nowrap="" class="text-right" style="width: 15%;"><?php echo number_format($v['Ecommercedetail']['unit_price'], 2, ',', ' ') ?></td>
           <td nowrap="" class="text-right" style="width: 15%;"><?php echo number_format($total_unitaire, 2, ',', ' ') ?></td>
