@@ -93,10 +93,10 @@ $('#edit').on('click','.print-ticket-impr',function(e){
                     <td style="text-align: left;"><?php echo $tache['Produit']['libelle']; ?></td>
                     <td nowrap=""><?php echo $tache['Salepointdetail']['qte']; ?></td>
                     <td nowrap="" style="text-align: right;">
-                        <?php echo number_format(isset($this->data['Salepoint']['ecommerce_id']) ? $tache['Salepointdetail']['unit_price'] : $tache['Salepointdetail']['prix_vente'], 2, ',', ' '); ?>
+                        <?php echo number_format(isset($this->data['Salepoint']['ecommerce_id']) ? $tache['Salepointdetail']['unit_price'] : $tache['Salepointdetail']['prix_vente'], 2, ',', ' ') . ' AED'; ?>
                     </td>
                     <td nowrap="" style="text-align: right;"><?php echo (int) $tache['Salepointdetail']['remise']; ?>%</td>
-                    <td nowrap="" style="text-align: right;"><?php echo number_format($tache['Salepointdetail']['ttc'], 2, ',', ' '); ?></td>
+                    <td nowrap="" style="text-align: right;"><?php echo number_format($tache['Salepointdetail']['ttc'], 2, ',', ' ') . ' AED'; ?></td>
                 </tr>
                 <?php endforeach; ?>
             </table>
@@ -105,7 +105,7 @@ $('#edit').on('click','.print-ticket-impr',function(e){
             <div class="list_valeurs_ticket">Glovo order : <?php echo $this->data['Commandeglovo']['order_code'] ?></div>
             <?php endif ?>
 
-            <div class="list_valeurs_ticket">Amount : <?php echo number_format($this->data['Salepoint']['total_a_payer_ttc'], 2, ',', ' '); ?></div>
+            <div class="list_valeurs_ticket">Amount : <?php echo number_format($this->data['Salepoint']['total_a_payer_ttc'], 2, ',', ' ') . ' AED'; ?></div>
 
             <div class="list_valeurs_ticket">
                 <?php if ($this->data['Salepoint']['etat'] == 3) : ?>
@@ -119,19 +119,19 @@ $('#edit').on('click','.print-ticket-impr',function(e){
                 <?php endif; ?>
             </div>
 
-            <div class="list_valeurs_ticket">Fees : <?php echo number_format($this->data['Salepoint']['fee'], 2, ',', ' '); ?></div>
+            <div class="list_valeurs_ticket">Fees : <?php echo number_format($this->data['Salepoint']['fee'], 2, ',', ' ') . ' AED'; ?></div>
 
             <div class="list_valeurs_ticket">
-                Discount : <?php echo number_format(($this->data['Salepoint']['etat'] == 3 ? 0 : $this->data['Salepoint']['total_a_payer_ttc'] - $this->data['Salepoint']['total_paye']), 2, ',', ' '); ?>
+                Discount : <?php echo number_format(($this->data['Salepoint']['etat'] == 3 ? 0 : $this->data['Salepoint']['total_a_payer_ttc'] - $this->data['Salepoint']['total_paye']), 2, ',', ' ') . ' AED'; ?>
             </div>
 
             <div class="list_valeurs_ticket">
-                AMOUNT DUE : <?php echo number_format(($this->data['Salepoint']['etat'] == 3 ? $this->data['Salepoint']['total_apres_reduction'] : $this->data['Salepoint']['total_paye'] + $this->data['Salepoint']['fee']), 2, ',', ' '); ?>
+                AMOUNT DUE : <?php echo number_format(($this->data['Salepoint']['etat'] == 3 ? $this->data['Salepoint']['total_apres_reduction'] : $this->data['Salepoint']['total_paye'] + $this->data['Salepoint']['fee']), 2, ',', ' ') . ' AED'; ?>
             </div>
 
             <?php if (isset($this->data['Salepoint']['check_cad']) && !empty($this->data['Salepoint']['check_cad'])) :  ?>
             <div class="list_valeurs_ticket">
-                Please collect your gift voucher of <?php echo $this->data['Chequecadeau']['montant']; ?> Dhs, number : <?php echo $this->data['Chequecadeau']['reference']; ?>
+                Please collect your gift voucher of <?php echo $this->data['Chequecadeau']['montant']; ?> AED, number : <?php echo $this->data['Chequecadeau']['reference']; ?>
             </div>
             <?php endif; ?>
 
