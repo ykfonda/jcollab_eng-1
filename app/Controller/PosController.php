@@ -514,6 +514,7 @@ class PosController extends AppController
             die('Il y a un problème');
         }
     }
+    
 
     public function ticket($salepoint_id = null)
     {
@@ -548,14 +549,29 @@ class PosController extends AppController
         'group' => ['Produit.tva_vente'], ]);
 
 */
-        $str = 'SELECT tva, SUM(mnt_ht) as ht, SUM(taxe) AS tax, SUM(mnt_ttc) As ttc FROM ( 
-            SELECT Produits.tva_vente As tva, Salepointdetails.ttc / (1 + (Produits.tva_vente/100)) As mnt_ht, Salepointdetails.ttc * (Produits.tva_vente / 100) / (1 + (Produits.tva_vente/100)) as taxe, Salepointdetails.ttc As mnt_ttc
-            from Produits, Salepointdetails where Produits.id = Salepointdetails.produit_id and Salepointdetails.salepoint_id = :salepoint_detail_id
+
+        // calculer la TVA
+        $tvaRate = 5; 
+        $tvaDecimal = 1 + ($tvaRate / 100);
+
+        $str = "SELECT tva, SUM(mnt_ht) as ht, SUM(taxe) AS tax, SUM(mnt_ttc) As ttc FROM ( 
+            SELECT Produits.tva_vente As tva, 
+                Salepointdetails.ttc / (1 + (Produits.tva_vente/100)) As mnt_ht, 
+                Salepointdetails.ttc * (Produits.tva_vente / 100) / (1 + (Produits.tva_vente/100)) as taxe, 
+                Salepointdetails.ttc As mnt_ttc
+            FROM Produits, Salepointdetails 
+            WHERE Produits.id = Salepointdetails.produit_id 
+            AND Salepointdetails.salepoint_id = :salepoint_detail_id
             UNION ALL
-            SELECT 20, (Salepoints.fee / 1.2), (Salepoints.fee * 0.2 / 1.2), Salepoints.fee
-            from Salepoints
-            where Salepoints.id = :salepoint_detail_id and fee <> 0) AS Tmps
-            group by tva';
+            SELECT {$tvaRate}, 
+                (Salepoints.fee / {$tvaDecimal}), 
+                (Salepoints.fee * " . ($tvaRate / 100) . " / {$tvaDecimal}), 
+                Salepoints.fee
+            FROM Salepoints
+            WHERE Salepoints.id = :salepoint_detail_id AND fee <> 0
+        ) AS Tmps
+        GROUP BY tva";
+
 
         $db = $this->Salepoint->getDataSource();
 
