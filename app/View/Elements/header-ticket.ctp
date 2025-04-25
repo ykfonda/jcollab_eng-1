@@ -26,11 +26,11 @@
 	
 <div class="titles-ticket">
 	<?php endif ?>
-	<b>Adresse : </b><?php echo $store_data['Store']['adresse'] ?>
+	<b>Adress : </b><?php echo $store_data['Store']['adresse'] ?>
 <br />
-	<b>Tél : </b><?php echo $store_data['Store']['tel'] ?> <br />
-	<b>RC : </b><?php echo $societe['Societe']['registrecommerce'] ?>
-	<b>IF : </b><?php echo $societe['Societe']['idfiscale'] ?>
-	<b>ICE : </b><?php echo $societe['Societe']['ice'] ?>
-	<b><br />TP : </b><?php echo $store_data['Store']['numero_tp'] ?>
+	<b>Phone : </b><?php echo $store_data['Store']['tel'] ?> <br />
+	<b>TRN : </b><?php echo $societe['Societe']['idfiscale'] ?>
+	<!-- <b>IF : </b><?php // echo $societe['Societe']['idfiscale'] ?> 
+	<b>ICE : </b><?php // echo $societe['Societe']['ice'] ?>
+	<b><br />TP : </b><?php //echo $store_data['Store']['numero_tp'] ?>-->
 </div>
