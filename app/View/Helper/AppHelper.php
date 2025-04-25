@@ -189,10 +189,20 @@ class AppHelper extends Helper
 
     public function getModePaiment($k = null)
     {
-        $Arr = ['espece' => 'Espèces', 'cod' => 'cod',
-         'wallet' => 'Wallet', 'bon_achat' => "Bon d'achat", 'cheque_cadeau' => 'Chèque cadeau',
-          'cmi' => 'CMI', 'offert' => 'Offert', 'tpe' => 'Tpe',
-          'Carte' => 'Carte', 'delayed' => 'Delayed', 'virement' => 'Virement', 'cheque' => 'Chèque', ];
+        $Arr = [
+            'espece' => 'Cash',
+            'cod' => 'Cash on Delivery',
+            'wallet' => 'Wallet',
+            'bon_achat' => 'Gift Voucher',
+            'cheque_cadeau' => 'Gift Check',
+            'cmi' => 'CMI',
+            'offert' => 'Offered',
+            'tpe' => 'POS Terminal',
+            'Carte' => 'Card',
+            'delayed' => 'Deferred',
+            'virement' => 'Bank Transfer',
+            'cheque' => 'Check',
+        ];        
         if ($k === null) {
             return $Arr;
         }

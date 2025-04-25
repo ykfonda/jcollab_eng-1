@@ -107,5 +107,8 @@ Thank you for your understanding.
             'height' => '150'
         ]);
     ?>
-    <p class="sous-footer text-center"> Maison de qualité    </p>
+    <p class="sous-footer text-center"> Maison de qualité 
+    <br />
+    دار الـتـمـيّــز    
+    </p>
 </div>
