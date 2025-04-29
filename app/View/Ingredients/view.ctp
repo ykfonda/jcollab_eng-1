@@ -217,7 +217,7 @@
         foreach ($prix_conditionnement as $conditionnement => $prix): ?>
             <tr>
                 <td><?php echo h($conditionnement); ?></td>
-                <td><?php echo h($prix . " DH"); ?></td>
+                <td><?php echo h($prix); ?></td>
                 <td>
                     <?php
                     // Vérifier si un EAN13 existe pour ce conditionnement
