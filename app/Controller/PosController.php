@@ -2616,20 +2616,45 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
     }
 
 
-    public function getEan13Details($code_ean13) {
+    public function getEan13Details($code_ean13, $client_id = null) {
         $this->autoRender = false;
         // il faut ajouter le store ID ici
         $store_id = $this->Session->read('Auth.User.StoreSession.id');
     
         $this->loadModel('Ean13Code');
-    
-        $ean = $this->Ean13Code->find('first', [
-            'conditions' => [
-                'Ean13Code.code_ean13' => $code_ean13,
-                'Ean13Code.store_id' => $store_id
-            ]
-        ]);
-    
+
+        // if $client_id is null
+        if ($client_id != null) {
+            // if $client_id is not null
+            $ean = $this->Ean13Code->find('first', [
+                'conditions' => [
+                    'Ean13Code.code_ean13' => $code_ean13,
+                    'Ean13Code.store_id' => $store_id,
+                    'Ean13Code.client_id' => $client_id // <-- ici on filtre par client_id
+                ]
+            ]);
+            // if $ean is empty
+            if (empty($ean)) {
+                // on cherche sans client_id
+                $ean = $this->Ean13Code->find('first', [
+                    'conditions' => [
+                        'Ean13Code.code_ean13' => $code_ean13,
+                        'Ean13Code.store_id' => $store_id,
+                        'Ean13Code.client_id' => null // <-- ici on filtre par client_id
+                    ]
+                ]);
+            }
+        } else {
+            // if $client_id is null
+            $ean = $this->Ean13Code->find('first', [
+                'conditions' => [
+                    'Ean13Code.code_ean13' => $code_ean13,
+                    'Ean13Code.store_id' => $store_id,
+                    'Ean13Code.client_id' => null
+                ]
+            ]);
+        }
+            
         if (!empty($ean)) {
             return $ean['Ean13Code'];
         }
@@ -2640,6 +2665,19 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
     
     public function scan($code_barre = null, $salepoint_id = null)
     {
+
+        // Depuis la table salespoint selectionner le client_id à la base de $salepoint_id
+        $client_id = $this->Salepoint->find('first', [
+            'conditions' => ['Salepoint.id' => $salepoint_id],
+            'fields' => ['Salepoint.client_id']
+        ]);
+        // tester si le client_id existe
+        if (isset($client_id['Salepoint']['client_id']) and !empty($client_id['Salepoint']['client_id'])) {
+            $client_id = $client_id['Salepoint']['client_id'];
+        } else {
+            $client_id = null;
+        }
+
 
         $response['error'] = true;
         $response['message'] = '';
@@ -2653,7 +2691,7 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
             $cb_div_kg = (isset($params['cb_div_kg']) and !empty($params['cb_div_kg']) and $params['cb_div_kg'] > 0) ? (int) $params['cb_div_kg'] : 1000;
 
                 $code_ean13 = $code_barre;
-                $produit = $this->getEan13Details($code_ean13);
+                $produit = $this->getEan13Details($code_ean13, $client_id);
 
                 if (!empty($produit)) {
                 $code_article = $produit['code_barre'];
@@ -2680,7 +2718,14 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
                     // Étape 2 : récupérer prix_vente depuis EAN13
 
                     $code_ean13 = $code_barre;
-                    $details = $this->getEan13Details($code_ean13);
+
+                    // if $client_id is null
+                    if ($client_id != null) {
+                        $details = $this->getEan13Details($code_ean13, $client_id);
+                    } else {
+                        // if $client_id is null
+                        $details = $this->getEan13Details($code_ean13, null);
+                    }
 
                     // Vérification de l'existence de nom_produit
                     if (!empty($details['nom_produit'])) {
