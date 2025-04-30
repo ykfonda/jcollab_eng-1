@@ -2199,12 +2199,12 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
                                     $total_ttc = round($produit['Salepointdetail']['prix_vente'] * $qte, 2);
                                 }
                                 ///////////
-                                else {
+                                // if not isset $produit['Salepoint']['glovo_id'] and is noet isset $ecommerced 
+                                if (!isset($produit['Salepoint']['glovo_id']) and !isset($ecommerced)) {
                                     $prix_vente_ht = round($produit['Produit']['prix_vente'] / $division_tva, 2);
                                     $prix_vente_ttc = $produit['Produit']['prix_vente'];
 
                                     $total_ht = round($prix_vente_ht * $qte, 2);
-
                                     $total_ttc = round($prix_vente_ttc * $qte, 2);
                                 }
 
