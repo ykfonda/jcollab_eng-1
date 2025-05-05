@@ -491,10 +491,10 @@ class PosController extends AppController
 
         if ($this->Salepoint->saveAssociated($data)) {
 
-            App::import('Controller', 'Ecommerces'); // nom du fichier sans "Controller"
-            $Ecommerces = new EcommercesController(); // nom exact de la classe
-            $Ecommerces->constructClasses(); // charge les modèles
-            $Ecommerces->changeStatus($ecommerce_id, 'in_preparation');
+            // App::import('Controller', 'Ecommerces'); // nom du fichier sans "Controller"
+            // $Ecommerces = new EcommercesController(); // nom exact de la classe
+            // $Ecommerces->constructClasses(); // charge les modèles
+            // $Ecommerces->changeStatus($ecommerce_id, 'in_preparation');
 
             $this->calcule($salepoint_id);
             $this->Session->setFlash('L\'action a été effectué avec succès.', 'alert-success');
@@ -1295,7 +1295,7 @@ class PosController extends AppController
 
                 $ecommerce_id = $salepoint['Salepoint']['ecommerce_id'];
 
-                var_dump($ecommerce_id);
+                // var_dump($ecommerce_id);
 
                 // Change le statut de la commande e-commerce
                 App::import('Controller', 'Ecommerces'); // nom du fichier sans "Controller"
@@ -4295,7 +4295,11 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
                 'online_id' => $order['id'],
                 'fee' => isset($order['fee']) ? $order['fee'] : "0.00",
                 'shipment' => $order['shipment'],
-                'payment_method' => $order['payment_method'],
+
+                // si $order['payment_method'] = Stripe => 'Carte' sinon donne moi la valeur de $order['payment_method']
+                'payment_method' => ($order['payment_method'] == 'Stripe') ? 'cmi' : $order['payment_method'],
+                
+                
                 'adresse' => $order['customer']['address'],
                 'date' => date('Y-m-d', strtotime($order['date_created'])),
                 'store_id' => 1,
