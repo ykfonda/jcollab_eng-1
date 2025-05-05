@@ -1281,20 +1281,48 @@ class PosController extends AppController
             }
 
 
-            // E-Commerce
+            // E-Commerce et change stat de la commande
             if (isset($salepoint['Salepoint']['ecommerce_id']) and !empty($salepoint['Salepoint']['ecommerce_id'])) {
                 //debug( $salepoint['Salepoint']['total_cmd'] );
                 // debug( $salepoint['Salepoint']['total_apres_reduction'] );
 
-                $ecommerce_id = $salepoint['Salepoint']['ecommerce_id'];
+                // $ecommerce_id = $salepoint['Salepoint']['ecommerce_id'];
 
                 // var_dump($ecommerce_id);
 
                 // Change le statut de la commande e-commerce
-                App::import('Controller', 'Ecommerces'); // nom du fichier sans "Controller"
-                $Ecommerces = new EcommercesController(); // nom exact de la classe
-                $Ecommerces->constructClasses(); // charge les modèles
-                $Ecommerces->changeStatus($ecommerce_id, 'ready_for_delivery');
+                //App::import('Controller', 'Ecommerces'); // nom du fichier sans "Controller"
+                //$Ecommerces = new EcommercesController(); // nom exact de la classe
+                //$Ecommerces->constructClasses(); // charge les modèles
+                // $Ecommerces->changeStatus($ecommerce_id, 'ready_for_delivery');
+
+
+                
+
+
+                $shipment = $salepoint['Salepoint']['expedition'];
+                $ecommerceId = $salepoint['Salepoint']['ecommerce_id'];
+
+                // à la base de ecommerceId recuperer l'orderId = online_id depuis la table ecommerces
+                $ecommerce = $this->Ecommerce->find('first', ['conditions' => ['Ecommerce.id' => $ecommerceId]]);
+                $orderId = $ecommerce['Ecommerce']['online_id'];
+
+                // 1) Instanciation du contrôleur une seule fois
+
+                if ($shipment == 'delivery') {
+                    App::uses('EcommercesController', 'Controller');
+                    $Ecommerces = new EcommercesController();
+                    $Ecommerces->constructClasses();
+                    $Ecommerces->changeStatus($orderId, 'ready_for_delivery');
+                    $this->Session->setFlash('La commande a été mise à jour avec succès / ready_for_delivery', 'alert-success');
+                } elseif ($shipment == 'self') {
+                    App::uses('EcommercesController', 'Controller');
+                    $Ecommerces = new EcommercesController();
+                    $Ecommerces->constructClasses();
+                    $Ecommerces->changeStatus($orderId, 'assigned_to_delivery_person');
+                    $this->Session->setFlash('La commande a été mise à jour avec succès / assigned_to_delivery_person', 'alert-success');
+                }
+
             }
 
             $avances = $this->Salepoint->Avance->find('list', ['fields' => ['id', 'id'], 'conditions' => ['salepoint_id' => $salepoint_id]]);
@@ -1390,34 +1418,7 @@ class PosController extends AppController
                         $this->Commande->Commandedetail->saveMany($commandedetails);
                     }
                 }
-                if (isset($salepoint['Salepoint']['ecommerce_id']) and !empty($salepoint['Salepoint']['ecommerce_id'])) {
-
-
-                var_dump($salepoint['Salepoint']['expedition']);
-
-                
-
-                $shipment = $salepoint['Salepoint']['expedition'];
-                $ecommerceId = $salepoint['Salepoint']['ecommerce_id'];
-
-                // à la base de ecommerceId recuperer l'orderId = online_id depuis la table ecommerces
-                $ecommerce = $this->Ecommerce->find('first', ['conditions' => ['Ecommerce.id' => $ecommerceId]]);
-                $orderId = $ecommerce['Ecommerce']['online_id'];
-
-
-                // 1) Instanciation du contrôleur une seule fois
-                App::uses('EcommercesController', 'Controller');
-                $Ecommerces = new EcommercesController();
-                $Ecommerces->constructClasses();
-
-                if ($shipment == 'delivery') {
-                    $Ecommerces->changeStatus($orderId, 'ready_for_delivery');
-                    $this->Session->setFlash('La commande a été mise à jour avec succès / ready_for_delivery', 'alert-success');
-                } elseif ($shipment == 'self') {
-                    $Ecommerces->changeStatus($orderId, 'assigned_to_delivery_person');
-                    $this->Session->setFlash('La commande a été mise à jour avec succès / assigned_to_delivery_person', 'alert-success');
-                }
-                 
+                if (isset($salepoint['Salepoint']['ecommerce_id']) and !empty($salepoint['Salepoint']['ecommerce_id'])) {     
                     $saveEcommerce['Ecommercedetail'] = [];
                     $saveEcommerce['Ecommerce']['etat'] = 2;
                     $saveEcommerce['Ecommerce']['id'] = $salepoint['Salepoint']['ecommerce_id'];

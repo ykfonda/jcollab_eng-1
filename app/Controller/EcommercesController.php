@@ -1115,10 +1115,7 @@ $this->set('id', 9);
     }
 
     public function changeStatus($id = null, $status = null)
-    {
-
-        // $status = 'confirmed'; // ou 'shipped', 'delivered', etc.
-        
+    {        
         $this->autoRender = false;
 
         if (!$id) {
