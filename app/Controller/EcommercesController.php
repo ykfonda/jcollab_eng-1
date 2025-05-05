@@ -1053,8 +1053,6 @@ $this->set('id', 9);
     }
 
 
-
-
     public function generateBonPreparation($id = null)
     {
         $this->layout = null; // Pas de layout global
