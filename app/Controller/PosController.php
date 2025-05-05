@@ -4388,12 +4388,19 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
 
 
         //  en boucle sur le nombre orderIds il feut répeter la fonction suivante 
-        foreach ($orderIds as $orderId) {
+            // Chargez le contrôleur une seule fois
+            $data = ['order_ids' => $orderIds];
+
             App::uses('EcommercesController', 'Controller');
             $Ecommerces = new EcommercesController();
             $Ecommerces->constructClasses();
-            $Ecommerces->changeStatus($orderId, 'confirmed');
-        }
+
+            // Parcourez la liste extraite de $data
+            foreach ($data['order_ids'] as $orderId) {
+                $Ecommerces->changeStatus($orderId, 'confirmed');
+            }
+
+
     }
 
     
