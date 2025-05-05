@@ -1095,12 +1095,6 @@ $this->set('id', 9);
             $detail['Produit']['libelle'] = !empty($produit['Produit']['libelle']) ? $produit['Produit']['libelle'] : '<i>Produit introuvable</i>';
         }
 
-
-        // Appel la function changeStatus pour changer le statut de la commande
-        //  $this->changeStatus($id, 'confirmed');
-
-        //var_dump($id);die;
-
         $view = new View($this, false);
         $view->viewPath = 'Ecommerces';
         $view->set(compact('data', 'details'));
@@ -1139,7 +1133,7 @@ $this->set('id', 9);
     
         // $onlineId = $ecommerce['Ecommerce']['online_id'];
         $onlineId = $id;
-        
+
         $payload = [
             'site' => 1,
             'id' => (int)$onlineId,
