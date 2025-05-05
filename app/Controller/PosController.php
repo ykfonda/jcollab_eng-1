@@ -4354,14 +4354,14 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
             $this->confirmOrders($orderIds); // in progress 
         }
 
-        if (!empty($orderIds)) {
+        //  en boucle sur le nombre orderIds il feut répeter la fonction suivante 
+        foreach ($orderIds as $orderId) {
             App::uses('EcommercesController', 'Controller');
             $Ecommerces = new EcommercesController();
             $Ecommerces->constructClasses();
-            $Ecommerces->changeStatus($orderIds, 'confirmed');
+            $Ecommerces->changeStatus($orderId, 'confirmed');
         }
-
-
+        
     }
     
     // Fonction pour confirmer les commandes
