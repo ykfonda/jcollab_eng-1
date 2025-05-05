@@ -4305,7 +4305,7 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
                 'adresse' => $order['customer']['address'],
                 'date' => date('Y-m-d', strtotime($order['date_created'])),
                 'store_id' => 1,
-                'statut' => 'in_progress',
+                'statut' => 'confirmed',
                 'client_id' => $customerId,
                 'total_qte' => array_sum(array_column($order['line_items'], 'quantity')),
                 'total_a_payer_ttc' => array_sum(array_map(function($item) {
@@ -4351,9 +4351,10 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
         }
     
         if (!empty($orderIds)) {
-            $status = 'confirmed';
-            $this->confirmOrders($orderIds, $status);
-        } 
+            // $status = 'confirmed';
+            $this->confirmOrders($orderIds);
+        }
+
     }
     
     // Fonction pour confirmer les commandes
@@ -4361,7 +4362,7 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
         $this->autoRender = false;
     
         $parametres = $this->GetParametreSte();
-        $url = "https://lafonda-uat.o2usd.net/rest/api/orders/";
+        $url = "https://lafonda-uat.o2usd.net/rest/api/orders/confirm-orders";
         $user = $parametres['User'];
         $password = $parametres['Password'];
     
