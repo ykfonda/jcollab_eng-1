@@ -4352,16 +4352,7 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
     
         if (!empty($orderIds)) {
             $this->confirmOrders($orderIds); // in progress 
-        }
-
-        //  en boucle sur le nombre orderIds il feut répeter la fonction suivante 
-        foreach ($orderIds as $orderId) {
-            App::uses('EcommercesController', 'Controller');
-            $Ecommerces = new EcommercesController();
-            $Ecommerces->constructClasses();
-            $Ecommerces->changeStatus($orderId, 'confirmed');
-        }
-        
+        }       
     }
     
     // Fonction pour confirmer les commandes
@@ -4394,6 +4385,15 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
         }
     
         curl_close($ch);
+
+
+        //  en boucle sur le nombre orderIds il feut répeter la fonction suivante 
+        foreach ($orderIds as $orderId) {
+            App::uses('EcommercesController', 'Controller');
+            $Ecommerces = new EcommercesController();
+            $Ecommerces->constructClasses();
+            $Ecommerces->changeStatus($orderId, 'confirmed');
+        }
     }
 
     
