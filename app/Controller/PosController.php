@@ -489,12 +489,6 @@ class PosController extends AppController
         }
 
         if ($this->Salepoint->saveAssociated($data)) {
-
-            // App::import('Controller', 'Ecommerces'); // nom du fichier sans "Controller"
-            // $Ecommerces = new EcommercesController(); // nom exact de la classe
-            // $Ecommerces->constructClasses(); // charge les modèles
-            // $Ecommerces->changeStatus($ecommerce_id, 'in_preparation');
-
             $this->calcule($salepoint_id);
             $this->Session->setFlash('L\'action a été effectué avec succès.', 'alert-success');
         } else {
