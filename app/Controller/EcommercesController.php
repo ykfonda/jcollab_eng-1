@@ -1101,6 +1101,8 @@ $this->set('id', 9);
         // Appel la function changeStatus pour changer le statut de la commande
          $this->changeStatus($id, 'confirmed');
 
+        //var_dump($id);die;
+
         $view = new View($this, false);
         $view->viewPath = 'Ecommerces';
         $view->set(compact('data', 'details'));
@@ -1115,9 +1117,83 @@ $this->set('id', 9);
         $dompdf->stream("Bon_preparation_{$data['Ecommerce']['barcode']}.pdf", ['Attachment' => false]);
     }
 
-
-        public function changeStatus($id = null, $status = null)
+    public function changeStatus($id = null, $status = null)
     {
+
+        // $status = 'confirmed'; // ou 'shipped', 'delivered', etc.
+        
+        $this->autoRender = false;
+
+        if (!$id) {
+            throw new NotFoundException(__('Commande non trouvée'));
+        }
+
+        $parametres = $this->GetParametreSte();
+        $user = $parametres['User'];
+        $password = $parametres['Password'];
+        $url = $parametres['Api update pos'];
+
+        $ecommerce = $this->Ecommerce->find('first', [
+            'conditions' => ['Ecommerce.id' => $id],
+            'contain' => ['Ecommercedetail']
+        ]);
+    
+        $onlineId = $ecommerce['Ecommerce']['online_id'];
+
+        $payload = [
+            'site' => 1,
+            'id' => (int)$onlineId,
+            'status' => $status
+        ];
+
+        $jsonData = json_encode($payload);
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Authorization: Basic ' . base64_encode($user . ':' . $password)
+        ]);
+
+        $response = curl_exec($ch);
+
+        if (curl_errno($ch)) {
+            $error = curl_error($ch);
+            curl_close($ch);
+            $this->Session->setFlash("Erreur CURL : $error", 'default', [], 'error');
+            $this->redirect($this->referer());
+        }
+
+        curl_close($ch);
+
+        // Décoder la réponse
+        $decoded = json_decode($response, true);
+
+        // Si l'API a répondu avec succès
+        if (!empty($decoded['success']) && $decoded['success'] === true) {
+            // Mettre à jour le statut dans la base locale
+            $this->Ecommerce->id = $id;
+            $this->Ecommerce->saveField('statut', $status);
+
+            $this->Session->setFlash('Commande mise à jour avec succès. Nouveau statut : ' . $status, 'default', [], 'success');
+        } else {
+            $msg = !empty($decoded['message']) ? $decoded['message'] : 'Erreur inconnue lors de la mise à jour.';
+            $this->Session->setFlash('Erreur API : ' . $msg, 'default', [], 'error');
+        }
+
+       // $this->redirect($this->referer());
+    }
+
+
+
+    public function changeStatusBackup($id = null, $status = null)
+    {
+
+        // $status = 'confirmed'; // ou 'shipped', 'delivered', etc.
+        
         $this->autoRender = false;
 
         if (!$id) {
@@ -1145,7 +1221,7 @@ $this->set('id', 9);
                 ];
             }
         }
-
+    
         $onlineId = $ecommerce['Ecommerce']['online_id'];
 
         $payload = [
