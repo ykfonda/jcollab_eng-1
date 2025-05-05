@@ -1398,6 +1398,33 @@ class PosController extends AppController
                     }
                 }
                 if (isset($salepoint['Salepoint']['ecommerce_id']) and !empty($salepoint['Salepoint']['ecommerce_id'])) {
+
+
+                var_dump($salepoint['Salepoint']['expedition']);
+
+                
+
+                $shipment = $salepoint['Salepoint']['expedition'];
+                $ecommerceId = $salepoint['Salepoint']['ecommerce_id'];
+
+                // à la base de ecommerceId recuperer l'orderId = online_id depuis la table ecommerces
+                $ecommerce = $this->Ecommerce->find('first', ['conditions' => ['Ecommerce.id' => $ecommerceId]]);
+                $orderId = $ecommerce['Ecommerce']['online_id'];
+
+
+                // 1) Instanciation du contrôleur une seule fois
+                App::uses('EcommercesController', 'Controller');
+                $Ecommerces = new EcommercesController();
+                $Ecommerces->constructClasses();
+
+                if ($shipment == 'delivery') {
+                    $Ecommerces->changeStatus($orderId, 'ready_for_delivery');
+                    $this->Session->setFlash('La commande a été mise à jour avec succès / ready_for_delivery', 'alert-success');
+                } elseif ($shipment == 'self') {
+                    $Ecommerces->changeStatus($orderId, 'assigned_to_delivery_person');
+                    $this->Session->setFlash('La commande a été mise à jour avec succès / assigned_to_delivery_person', 'alert-success');
+                }
+                 
                     $saveEcommerce['Ecommercedetail'] = [];
                     $saveEcommerce['Ecommerce']['etat'] = 2;
                     $saveEcommerce['Ecommerce']['id'] = $salepoint['Salepoint']['ecommerce_id'];
@@ -1418,6 +1445,7 @@ class PosController extends AppController
                     }
                     $this->Ecommerce->saveAssociated($saveEcommerce);
                 }
+
                 if (isset($salepoint['Salepoint']['glovo_id']) and !empty($salepoint['Salepoint']['glovo_id'])) {
                     $saveCommandeglovo['Commandeglovodetail'] = [];
                     $saveCommandeglovo['Commandeglovo']['etat'] = 2;
