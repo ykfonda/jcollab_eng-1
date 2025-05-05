@@ -4351,15 +4351,16 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
         }
     
         if (!empty($orderIds)) {
-            // $status = 'confirmed';
-            $this->confirmOrders($orderIds);
-
-            App::import('Controller', 'Ecommerces'); // nom du fichier sans "Controller"
-            $Ecommerces = new EcommercesController(); // nom exact de la classe
-            $Ecommerces->constructClasses(); // charge les modèles
-            $Ecommerces->changeStatus($orderIds, 'confirmed');
-            
+            $this->confirmOrders($orderIds); // in progress 
         }
+
+        if (!empty($orderIds)) {
+            App::uses('EcommercesController', 'Controller');
+            $Ecommerces = new EcommercesController();
+            $Ecommerces->constructClasses();
+            $Ecommerces->changeStatus($orderIds, 'confirmed');
+        }
+
 
     }
     
