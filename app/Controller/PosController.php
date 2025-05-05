@@ -456,17 +456,15 @@ class PosController extends AppController
         $first_key = key($depots);
 
         $this->Ecommerce->id = $ecommerce_id;
-        $this->Ecommerce->saveField('statut', 'en cours');
+        // $this->Ecommerce->saveField('statut', 'en cours');
         $this->Ecommerce->saveField('depot_id', $first_key);
         $client_id = (isset($commande['Ecommerce']['client_id']) and !empty($commande['Ecommerce']['client_id'])) ? $commande['Ecommerce']['client_id'] : null;
         $details = $this->Ecommerce->Ecommercedetail->find('all', ['conditions' => ['Ecommercedetail.ecommerce_id' => $ecommerce_id]]);
         $this->Salepoint->Salepointdetail->deleteAll(['Salepointdetail.salepoint_id' => $salepoint_id]);
         $fee = $commande['Ecommerce']['fee'];
         $expedition = $commande['Ecommerce']['shipment'];
+        $payment_method = $commande['Ecommerce']['payment_method'];
         $ecommerce_id = $ecommerce_id;
-        //$this->Session->write('fee',$fee);
-        //$this->Session->write('expedition',$expedition);
-        //$this->Session->write('ecommerce_id',$ecommerce_id);
 
         $data['Salepoint']['ecommerce_id'] = $ecommerce_id;
         $data['Salepoint']['client_id'] = $client_id;
@@ -474,6 +472,7 @@ class PosController extends AppController
         $data['Salepoint']['type_vente'] = 2;
         $data['Salepoint']['fee'] = $fee;
         $data['Salepoint']['expedition'] = $expedition;
+        $data['Salepoint']['payment_method'] = $payment_method;  
 
         $data['Salepointdetail'] = [];
         foreach ($details as $k => $v) {
