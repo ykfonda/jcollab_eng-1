@@ -4351,7 +4351,7 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
         }
     
         if (!empty($orderIds)) {
-            //$this->confirmOrders($orderIds);
+            $this->confirmOrders($orderIds);
         } 
     }
     
@@ -4360,7 +4360,7 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
         $this->autoRender = false;
     
         $parametres = $this->GetParametreSte();
-        $url = "https://lafonda-uat.o2usd.net/rest/api/orders/confirm-orders";
+        $url = "https://lafonda-uat.o2usd.net/rest/api/orders/";
         $user = $parametres['User'];
         $password = $parametres['Password'];
     
