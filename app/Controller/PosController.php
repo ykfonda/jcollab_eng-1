@@ -4351,7 +4351,8 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
         }
     
         if (!empty($orderIds)) {
-            $this->confirmOrders($orderIds);
+            $status = 'confirmed';
+            $this->confirmOrders($orderIds, $status);
         } 
     }
     
