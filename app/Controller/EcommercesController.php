@@ -1097,7 +1097,7 @@ $this->set('id', 9);
 
 
         // Appel la function changeStatus pour changer le statut de la commande
-         $this->changeStatus($id, 'confirmed');
+        //  $this->changeStatus($id, 'confirmed');
 
         //var_dump($id);die;
 
@@ -1131,13 +1131,15 @@ $this->set('id', 9);
         $password = $parametres['Password'];
         $url = $parametres['Api update pos'];
 
-        $ecommerce = $this->Ecommerce->find('first', [
-            'conditions' => ['Ecommerce.id' => $id],
-            'contain' => ['Ecommercedetail']
-        ]);
-    
-        $onlineId = $ecommerce['Ecommerce']['online_id'];
 
+        // $ecommerce = $this->Ecommerce->find('first', [
+        //    'conditions' => ['Ecommerce.id' => $id],
+        //    'contain' => ['Ecommercedetail']
+        // ]);
+    
+        // $onlineId = $ecommerce['Ecommerce']['online_id'];
+        $onlineId = $id;
+        
         $payload = [
             'site' => 1,
             'id' => (int)$onlineId,

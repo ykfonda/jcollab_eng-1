@@ -4234,12 +4234,6 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
     
         $this->autoRender = false;
     
-        // Récupérer les paramètres API
-        $parametres = $this->GetParametreSte();
-        $url = $parametres['Api pending'];
-        $user = $parametres['User'];
-        $password = $parametres['Password'];
-    
         echo "Début du script<br>";
     
         // Effectuer la requête vers l'API pour récupérer les commandes
@@ -4352,7 +4346,20 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
     
         if (!empty($orderIds)) {
             $this->confirmOrders($orderIds); // in progress 
-        }       
+        }    
+        
+        if (!empty($orderIds) && is_array($orderIds)) {
+            // 1) Instanciation du contrôleur une seule fois
+            App::uses('EcommercesController', 'Controller');
+            $Ecommerces = new EcommercesController();
+            $Ecommerces->constructClasses();
+        
+            // 2) Boucle directement sur ton tableau d’IDs
+            foreach ($orderIds as $orderId) {
+                $Ecommerces->changeStatus($orderId, 'confirmed');
+            }
+        }
+        
     }
     
     // Fonction pour confirmer les commandes
@@ -4364,8 +4371,7 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
         $user = $parametres['User'];
         $password = $parametres['Password'];
     
-        $data = json_encode(['order_ids' => $orderIds]);
-    
+        $data = json_encode(['order_ids' => $orderIds]);    
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -4385,26 +4391,7 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
         }
     
         curl_close($ch);
-
-
-        //  en boucle sur le nombre orderIds il feut répeter la fonction suivante 
-            // Chargez le contrôleur une seule fois
-            $data = ['order_ids' => $orderIds];
-
-            App::uses('EcommercesController', 'Controller');
-            $Ecommerces = new EcommercesController();
-            $Ecommerces->constructClasses();
-
-            // Parcourez la liste extraite de $data
-            foreach ($data['order_ids'] as $orderId) {
-                $Ecommerces->changeStatus($orderId, 'confirmed');
-            }
-
-
     }
-
-    
-
 
         // Fonction pour appeler l'API en GET avec authentification
     public function callApi() {
