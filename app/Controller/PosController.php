@@ -4297,8 +4297,7 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
                 'shipment' => $order['shipment'],
 
                 // si $order['payment_method'] = Stripe => 'Carte' sinon donne moi la valeur de $order['payment_method']
-                'payment_method' => ($order['payment_method'] == 'Stripe') ? 'cmi' : $order['payment_method'],
-                
+                'payment_method' => ($order['payment_method'] == 'stripe') ? 'cmi' : $order['payment_method'],
                 
                 'adresse' => $order['customer']['address'],
                 'date' => date('Y-m-d', strtotime($order['date_created'])),
