@@ -1319,8 +1319,8 @@ class PosController extends AppController
                     App::uses('EcommercesController', 'Controller');
                     $Ecommerces = new EcommercesController();
                     $Ecommerces->constructClasses();
-                    $Ecommerces->changeStatus($orderId, 'assigned_to_delivery_person');
-                    $this->Session->setFlash('La commande a été mise à jour avec succès / assigned_to_delivery_person', 'alert-success');
+                    $Ecommerces->changeStatus($orderId, 'ready_for_pickup');
+                    $this->Session->setFlash('La commande a été mise à jour avec succès / ready_for_pickup', 'alert-success');
                 }
 
             }
