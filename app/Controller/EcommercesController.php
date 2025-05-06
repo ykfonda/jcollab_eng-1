@@ -1116,6 +1116,17 @@ $this->set('id', 9);
 
     public function changeStatus($id = null, $status = null)
     {        
+
+
+        // if $status = ready_for_delivery il faut récuprer la date et l'heure d'aujourd'hui et ajouter +5min et créer une variable planned_start_time avec ce format : 2025-05-05 22:59
+        if ($status == 'ready_for_delivery') {
+            $date = new DateTime();
+            $date->modify('+5 minutes');
+            $planned_start_time = $date->format('Y-m-d H:i:s');
+        } else {
+            $planned_start_time = null;
+        }
+
         $this->autoRender = false;
 
         if (!$id) {
@@ -1139,7 +1150,8 @@ $this->set('id', 9);
         $payload = [
             'site' => 1,
             'id' => (int)$onlineId,
-            'status' => $status
+            'status' => $status,
+            'planned_start_time' => $planned_start_time,
         ];
 
         $jsonData = json_encode($payload);
