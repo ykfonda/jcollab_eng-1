@@ -4393,7 +4393,7 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
         $this->autoRender = false;
     
         $parametres = $this->GetParametreSte();
-        $url = "https://lafonda-uat.o2usd.net/rest/api/orders/confirm-orders";
+        $url = "https://uat.lafonda.ae/rest/api/orders/confirm-orders";
         $user = $parametres['User'];
         $password = $parametres['Password'];
     
@@ -4423,7 +4423,7 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
     public function callApi() {
         $this->autoRender = false;
 
-        $url = "https://lafonda-uat.o2usd.net/rest/api/orders/pending?site=1"; // Ajout du paramètre dans l'URL
+        $url = "https://uat.lafonda.ae/rest/api/orders/pending?site=1"; // Ajout du paramètre dans l'URL
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
