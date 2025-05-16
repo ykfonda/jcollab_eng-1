@@ -20,7 +20,7 @@ class EcommercesController extends AppController
 
 
     public function syncwebsite() {
-        $apiUrl = 'https://lafonda-uat.o2usd.net/rest/api/orders/pending';
+        $apiUrl = 'https://lafonda.ae/rest/api/orders/pending';
         $username = 'restapi';
         $password = 'DSDS@$%^&@#';
 
