@@ -872,7 +872,7 @@ class PosController extends AppController
     {
         // $this->generatecommandes();
 
-        // $this->SaveOrdersFromApi();  // save orders from API to DB - WEBSITE NEXA
+        $this->SaveOrdersFromApi();  // save orders from API to DB - WEBSITE NEXA
         
 
         // La liste des statuts de commande à afficher dans le POS
