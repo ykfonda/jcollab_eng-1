@@ -872,9 +872,6 @@ class PosController extends AppController
     {
         // $this->generatecommandes();
 
-        $this->SaveOrdersFromApi();  // save orders from API to DB - WEBSITE NEXA
-        
-
         // La liste des statuts de commande à afficher dans le POS
         $conditions['Ecommerce.statut'] = ['pending', 'confirmed', 'in_preparation', 'ready_for_delivery','in_progress'];
         $conditions['Ecommerce.etat'] = -1;
@@ -894,7 +891,9 @@ class PosController extends AppController
             'order' => ['Ecommerce.date desc'], ]);
         $created_at = $ecommerce[0]['Ecommerce']['date']; //$this->created_at;
         $this->set(compact('created_at', 'salepoint_id', 'ecommerces'));
-        $this->layout = false;        
+        $this->layout = false;       
+        
+        //$this->SaveOrdersFromApi();  // save orders from API to DB - WEBSITE NEXA
     }
 
     public function commandesGlovo($salepoint_id = null, $barcode = null)
@@ -4385,7 +4384,8 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
                 $Ecommerces->changeStatus($orderId, 'confirmed');
             }
         }
-        
+
+        $this->layout = false;
     }
     
     // Fonction pour confirmer les commandes

@@ -9,9 +9,47 @@
         </div>
 
         <div class="input-group-append">
+            <!-- 
             <button class="btn btn-default btn-reset-ecommerce" type="button">
                 <i class="fa fa-refresh" style="color: #007bff; font-size: 14px;"></i> Actualiser
             </button>
+            -->
+
+<!-- Synchronisation des commandes -->
+<button id="sync-orders-btn" class="btn btn-primary">
+    <i class="fa fa-refresh" style="color:rgb(242, 243, 236); font-size: 14px;"></i> Synchroniser les commandes
+</button>
+
+<script>
+$(document).ready(function() {
+    const baseUrl = window.location.origin + window.location.pathname.split('/Pos')[0];
+
+    $('#sync-orders-btn').on('click', function() {
+        $.ajax({
+            url: baseUrl + '/Pos/saveOrdersFromApi',
+            method: 'POST',
+            beforeSend: function() {
+                $('#sync-orders-btn').prop('disabled', true).html('<i class="fa fa-spinner fa-spin me-1"></i> Synchronisation...');
+            },
+            success: function() {
+                alert("Commandes synchronisées avec succès.");
+            },
+            error: function(xhr) {
+                alert("Erreur : " + xhr.responseText);
+            },
+            complete: function() {
+                $('#sync-orders-btn').prop('disabled', false).html('<i class="fa fa-sync-alt me-1"></i> Synchroniser les commandes');
+            }
+        });
+    });
+});
+</script>
+
+
+
+         
+
+
         </div>
     </div>
 </div>
