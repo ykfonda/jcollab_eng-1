@@ -3328,7 +3328,7 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
             $this->Commande->saveField('statut', '');
         } elseif (isset($salepoint['Salepoint']['ecommerce_id']) and !empty($salepoint['Salepoint']['ecommerce_id'])) {
             $this->Ecommerce->id = $salepoint['Salepoint']['ecommerce_id'];
-            $this->Ecommerce->saveField('statut', '');
+            $this->Ecommerce->saveField('statut', 'confirmed');
         }
 
         if ($this->Salepoint->save($data)) {
