@@ -1173,6 +1173,9 @@ class PosController extends AppController
         $error = false;
         $total = 0;
 
+// $caisse_id = $this->Session->read('caisse_id');
+$caisse_id = $this->Session->check('caisse_id') ? $this->Session->read('caisse_id') : 83;
+
         foreach ($details as $k => $v) {
             $qte_cmd = $v['Salepointdetail']['qte_cmd'];
             //if ( $v['Salepointdetail']['qte'] < $v['Salepointdetail']['qte_cmd'] ) $error = true;
