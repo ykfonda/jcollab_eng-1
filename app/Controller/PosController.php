@@ -1312,17 +1312,17 @@ $caisse_id = $this->Session->check('caisse_id') ? $this->Session->read('caisse_i
                 // 1) Instanciation du contrôleur une seule fois
 
                 if ($shipment == 'delivery') {
-                    App::uses('EcommercesController', 'Controller');
-                    $Ecommerces = new EcommercesController();
-                    $Ecommerces->constructClasses();
-                    $Ecommerces->changeStatus($orderId, 'ready_for_delivery');
-                    $this->Session->setFlash('La commande a été mise à jour avec succès / ready_for_delivery', 'alert-success');
+                    //App::uses('EcommercesController', 'Controller');
+                    //$Ecommerces = new EcommercesController();
+                    //$Ecommerces->constructClasses();
+                    //$Ecommerces->changeStatus($orderId, 'ready_for_delivery');
+                    $this->Session->setFlash('La commande a été mise à jour avec succès / ready_for_delivery - sans JEEBLY', 'alert-success');
                 } elseif ($shipment == 'self') {
-                    App::uses('EcommercesController', 'Controller');
-                    $Ecommerces = new EcommercesController();
-                    $Ecommerces->constructClasses();
+                    //App::uses('EcommercesController', 'Controller');
+                    //$Ecommerces = new EcommercesController();
+                    //$Ecommerces->constructClasses();
                     // $Ecommerces->changeStatus($orderId, 'ready_for_pickup');
-                    $Ecommerces->changeStatus($orderId, 'assigned_to_delivery_person');
+                    //$Ecommerces->changeStatus($orderId, 'assigned_to_delivery_person');
                     $this->Session->setFlash('La commande a été mise à jour avec succès / assigned_to_delivery_person', 'alert-success');
                 }
 
@@ -3622,8 +3622,8 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
                 'Salepoint.etat' => 2,
                 'Salepoint.store' => $selected_store,
                 'Salepoint.caisse_id' => $caisse_id,
-                //'Salepoint.ecommerce_id' => null,
-                //'Salepoint.commande_id' => null,
+                'Salepoint.ecommerce_id' => null,
+                'Salepoint.commande_id' => null,
                 'DATE_FORMAT(Salepoint.date_u, "%Y-%m-%d")' => $today,
             ],
             'contain' => ['Salepointdetail', 'Client'],
@@ -4387,14 +4387,20 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
         
         if (!empty($orderIds) && is_array($orderIds)) {
             // 1) Instanciation du contrôleur une seule fois
-            App::uses('EcommercesController', 'Controller');
-            $Ecommerces = new EcommercesController();
-            $Ecommerces->constructClasses();
+            //App::uses('EcommercesController', 'Controller');
+           // $Ecommerces = new EcommercesController();
+            //$Ecommerces->constructClasses();
         
             // 2) Boucle directement sur ton tableau d’IDs
+            //foreach ($orderIds as $orderId) {
+              //  $Ecommerces->changeStatus($orderId, 'confirmed');
+            //}
+
             foreach ($orderIds as $orderId) {
-                $Ecommerces->changeStatus($orderId, 'confirmed');
-            }
+    				$this->Ecommerce->changeStatus($orderId, 'confirmed');
+			}
+
+
         }
 
         $this->layout = false;
@@ -4432,7 +4438,7 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
     }
 
         // Fonction pour appeler l'API en GET avec authentification
-    public function callApi() {
+    public function callApiOldOne() {
         $this->autoRender = false;
 
         $url = "https://lafonda.ae/rest/api/orders/pending?site=1"; // Ajout du paramètre dans l'URL
@@ -4474,7 +4480,86 @@ $data['Salepointdetail']['nom_produit_ean13'] = $nom_produit_ean13; // le nom pr
     }
     
     
-    
+    public function callApi() {
+    $this->autoRender = false;
+
+    $url = "https://lafonda.ae/rest/api/orders/pending?site=1";
+    $username = 'restapi';
+    $password = 'DSDS@$%^&@#';
+    $curlPath = 'C:\tools\curl_openssl\curl-8.15.0_1-win64-mingw\bin\curl.exe';
+
+    // Construire la commande curl en ligne de commande
+    $command = sprintf('"%s" -X GET "%s" -H "Content-Type: application/json" -u "%s:%s" --insecure',
+        $curlPath,
+        $url,
+        $username,
+        $password
+    );
+
+    // Exécuter la commande et capturer la sortie
+    exec($command, $output, $returnVar);
+
+    if ($returnVar !== 0) {
+        return ['success' => false, 'error' => 'Erreur lors de l\'appel curl.exe'];
+    }
+
+    // Joindre les lignes de sortie et décoder le JSON
+    $response = implode("\n", $output);
+    return json_decode($response, true);
+}
+
+
+
+
+public function callApiTheNewOne() {
+    $this->autoRender = false;
+
+    $curlPath = 'C:\tools\curl_openssl\curl-8.15.0_1-win64-mingw\bin\curl.exe';
+    $url = 'https://lafonda.ae/rest/api/orders/pending?site=1';
+    $username = 'restapi';
+    $password = 'DSDS@$%^&@#';
+
+    // 🛠️ Construction sécurisée de la commande
+    $cmd = '"' . $curlPath . '" --tlsv1.3 -s -u "' . $username . ':' . $password . '" "' . $url . '" 2>&1';
+
+    // Exécution
+    exec($cmd, $output, $return_var);
+
+    if ($return_var !== 0) {
+        return array(
+            'success' => false,
+            'error' => 'Erreur curl',
+            'code' => $return_var,
+            'output' => $output
+        );
+    }
+
+    // Conversion de la réponse en tableau associatif
+    $response = implode("\n", $output);
+    $json = json_decode($response, true);
+
+    if (!$json || !isset($json['data'])) {
+        return array(
+            'success' => false,
+            'error' => 'Réponse API invalide ou vide',
+            'response' => $response
+        );
+    }
+
+    return $json;
+}
+
+
+
+public function testCallApi() {
+    $this->autoRender = false;
+    $result = $this->callApi();
+    debug($result); // ou echo json_encode($result, JSON_PRETTY_PRINT);
+}
+
+
+
+
 
     
 }
