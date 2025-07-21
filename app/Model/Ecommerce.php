@@ -44,5 +44,16 @@ class Ecommerce extends AppModel
 	    }
 	    return $results;
 	}
+
+
+	public function changeStatus($orderId, $status = 'confirmed') {
+	    App::uses('Sanitize', 'Utility');
+
+	    return $this->updateAll(
+	        ['Ecommerce.statut' => "'" . Sanitize::escape($status) . "'"],
+	        ['Ecommerce.barcode' => $orderId]
+	    );
+	}
+
 }
  ?>
