@@ -1098,7 +1098,9 @@ $this->set('id', 9);
 
         // Appel la function changeStatus pour changer le statut de la commande
         $online_id = $data['Ecommerce']['online_id'];
-        $this->changeStatus($online_id, 'in_preparation');
+        // $this->changeStatus($online_id, 'in_preparation');
+        $this->Ecommerce->changeStatus($online_id, 'in_preparation');
+
 
         $view = new View($this, false);
         $view->viewPath = 'Ecommerces';
